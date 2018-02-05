@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="example_switch"
+        android:summary="@string/pref_description_social_recommendations"
+        android:title="@string/pref_title_social_recommendations" />
+
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_username"
+        android:inputType="text"
+        android:key="user_username"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_username" />
+
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_password"
+        android:inputType="textPassword"
+        android:key="user_password"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_password" />
+
+
+</PreferenceScreen>

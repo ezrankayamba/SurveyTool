@@ -1,0 +1,62 @@
+#
+# generated on 2018/02/03 06:51:01
+#
+# --table-start--
+dataClass=apps.nezatech.co.tz.surveytool.db.FormInstance
+tableName=tbl_form_instance
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=name
+unique=true
+indexName=tbl_form_instance_name_idx
+# --field-end--
+# --field-start--
+fieldName=form
+foreign=true
+foreignAutoRefresh=true
+maxForeignAutoRefreshLevel=2
+foreignAutoCreate=true
+# --field-end--
+# --field-start--
+fieldName=recordDate
+columnName=record_date
+# --field-end--
+# --field-start--
+fieldName=json
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=apps.nezatech.co.tz.surveytool.db.Form
+tableName=tbl_form
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=formId
+columnName=form_id
+unique=true
+indexName=tbl_form_form_id_idx
+# --field-end--
+# --field-start--
+fieldName=name
+# --field-end--
+# --field-start--
+fieldName=description
+# --field-end--
+# --field-start--
+fieldName=json
+# --field-end--
+# --field-start--
+fieldName=display
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################

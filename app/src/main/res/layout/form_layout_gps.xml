@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10sp"
+    android:orientation="vertical"
+    android:paddingBottom="20sp"
+    android:paddingLeft="20sp"
+    android:paddingRight="20sp"
+    android:paddingTop="10sp"
+    android:weightSum="1">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/gpsAccuracy"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
+            android:layout_weight="0.62"
+            android:gravity="center_vertical"
+            android:text="Accuracy: Unknown, try refresh"
+            android:textAllCaps="true"
+            android:textStyle="italic" />
+
+        <ImageButton
+            android:id="@+id/btnGPSRefresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/vid_replay_24" />
+    </LinearLayout>
+
+</LinearLayout>
