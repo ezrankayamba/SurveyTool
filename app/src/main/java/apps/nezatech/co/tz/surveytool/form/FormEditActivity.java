@@ -1,4 +1,4 @@
-package apps.nezatech.co.tz.surveytool;
+package apps.nezatech.co.tz.surveytool.form;
 
 import android.Manifest;
 import android.content.Context;
@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -41,9 +42,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import apps.nezatech.co.tz.surveytool.R;
 import apps.nezatech.co.tz.surveytool.db.DatabaseHelper;
-import apps.nezatech.co.tz.surveytool.db.Form;
-import apps.nezatech.co.tz.surveytool.db.FormInstance;
+import apps.nezatech.co.tz.surveytool.db.model.Form;
+import apps.nezatech.co.tz.surveytool.db.model.FormInstance;
 import apps.nezatech.co.tz.surveytool.util.FormUtil;
 import apps.nezatech.co.tz.surveytool.util.Group;
 import apps.nezatech.co.tz.surveytool.util.Input;
@@ -258,6 +260,10 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
                 text.setText(v.get(0));
             }
             setTextDataType(text, dataType);
+            if (dataType != null && dataType.equals("TextArea")) {
+                text.setSingleLine(false);
+                text.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
+            }
             form.addView(text);
 
             setInputTag(input, text);

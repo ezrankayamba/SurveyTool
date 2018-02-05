@@ -2,7 +2,7 @@
 # generated on 2018/02/03 06:51:01
 #
 # --table-start--
-dataClass=apps.nezatech.co.tz.surveytool.db.FormInstance
+dataClass=apps.nezatech.co.tz.surveytool.db.model.FormInstance
 tableName=tbl_form_instance
 # --table-fields-start--
 # --field-start--
@@ -32,7 +32,7 @@ fieldName=json
 # --table-end--
 #################################
 # --table-start--
-dataClass=apps.nezatech.co.tz.surveytool.db.Form
+dataClass=apps.nezatech.co.tz.surveytool.db.model.Form
 tableName=tbl_form
 # --table-fields-start--
 # --field-start--

@@ -1,4 +1,4 @@
-package apps.nezatech.co.tz.surveytool.db;
+package apps.nezatech.co.tz.surveytool.db.model;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;

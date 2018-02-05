@@ -3,7 +3,7 @@ package apps.nezatech.co.tz.surveytool.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import apps.nezatech.co.tz.surveytool.db.Form;
+import apps.nezatech.co.tz.surveytool.db.model.Form;
 
 /**
  * Created by nkayamba on 2/2/18.

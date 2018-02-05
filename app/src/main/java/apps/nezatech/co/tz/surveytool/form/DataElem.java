@@ -1,4 +1,4 @@
-package apps.nezatech.co.tz.surveytool;
+package apps.nezatech.co.tz.surveytool.form;
 
 /**
  * Created by nkayamba on 2/3/18.

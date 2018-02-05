@@ -3,6 +3,7 @@
     package="apps.nezatech.co.tz.surveytool">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
@@ -31,7 +32,7 @@
                 android:value="apps.nezatech.co.tz.surveytool.MainActivity" />
         </activity>
         <activity
-            android:name=".FormInstanceActivity"
+            android:name=".form.FormInstanceActivity"
             android:label="@string/title_activity_form_instance"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -40,23 +41,23 @@
                 android:value="apps.nezatech.co.tz.surveytool.MainActivity" />
         </activity>
         <activity
-            android:name=".FormEditActivity"
+            android:name=".form.FormEditActivity"
             android:label="@string/title_activity_form_edit"
             android:launchMode="singleTop"
-            android:parentActivityName=".FormInstanceActivity"
+            android:parentActivityName=".form.FormInstanceActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="apps.nezatech.co.tz.surveytool.FormInstanceActivity" />
+                android:value="apps.nezatech.co.tz.surveytool.form.FormInstanceActivity" />
         </activity>
         <activity
-            android:name=".FormViewActivity"
+            android:name=".form.FormViewActivity"
             android:label="@string/title_activity_form_view"
-            android:parentActivityName=".FormInstanceActivity"
+            android:parentActivityName=".form.FormInstanceActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="apps.nezatech.co.tz.surveytool.FormInstanceActivity" />
+                android:value="apps.nezatech.co.tz.surveytool.form.FormInstanceActivity" />
         </activity>
     </application>
 

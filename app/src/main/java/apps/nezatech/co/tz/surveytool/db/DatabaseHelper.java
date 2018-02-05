@@ -12,6 +12,8 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 
 import apps.nezatech.co.tz.surveytool.R;
+import apps.nezatech.co.tz.surveytool.db.model.Form;
+import apps.nezatech.co.tz.surveytool.db.model.FormInstance;
 
 /**
  * Database helper which creates and upgrades the database and provides the DAOs for the app.

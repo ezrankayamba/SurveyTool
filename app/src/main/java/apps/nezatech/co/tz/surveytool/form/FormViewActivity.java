@@ -1,4 +1,4 @@
-package apps.nezatech.co.tz.surveytool;
+package apps.nezatech.co.tz.surveytool.form;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,9 +24,10 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import apps.nezatech.co.tz.surveytool.R;
 import apps.nezatech.co.tz.surveytool.db.DatabaseHelper;
-import apps.nezatech.co.tz.surveytool.db.Form;
-import apps.nezatech.co.tz.surveytool.db.FormInstance;
+import apps.nezatech.co.tz.surveytool.db.model.Form;
+import apps.nezatech.co.tz.surveytool.db.model.FormInstance;
 import apps.nezatech.co.tz.surveytool.util.FormUtil;
 
 public class FormViewActivity extends AppCompatActivity {
