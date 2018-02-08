@@ -92,4 +92,6 @@
     <string name="title_activity_form_instance">Form Data</string>
     <string name="title_activity_form_edit">FormEditActivity</string>
     <string name="title_activity_form_view">FormViewActivity</string>
+    <string name="authority">tz.co.nezatech.apps.surveytool.authority</string>
+    <string name="account_type">nezatech.co.tz</string>
 </resources>

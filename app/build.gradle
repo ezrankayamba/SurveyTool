@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "26.0.1"
     defaultConfig {
-        applicationId "apps.nezatech.co.tz.surveytool"
+        applicationId "tz.co.nezatech.apps.surveytool"
         minSdkVersion 19
         targetSdkVersion 25
         versionCode 1

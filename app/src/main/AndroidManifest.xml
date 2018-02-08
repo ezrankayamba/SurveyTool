@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="apps.nezatech.co.tz.surveytool">
+    package="tz.co.nezatech.apps.surveytool">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission
+        android:name="android.permission.USE_CREDENTIALS"
+        android:maxSdkVersion="22" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:allowBackup="true"
@@ -29,7 +37,7 @@
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="apps.nezatech.co.tz.surveytool.MainActivity" />
+                android:value="tz.co.nezatech.apps.surveytool.MainActivity" />
         </activity>
         <activity
             android:name=".form.FormInstanceActivity"
@@ -38,7 +46,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="apps.nezatech.co.tz.surveytool.MainActivity" />
+                android:value="tz.co.nezatech.apps.surveytool.MainActivity" />
         </activity>
         <activity
             android:name=".form.FormEditActivity"
@@ -48,7 +56,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="apps.nezatech.co.tz.surveytool.form.FormInstanceActivity" />
+                android:value="tz.co.nezatech.apps.surveytool.form.FormInstanceActivity" />
         </activity>
         <activity
             android:name=".form.FormViewActivity"
@@ -57,8 +65,34 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="apps.nezatech.co.tz.surveytool.form.FormInstanceActivity" />
+                android:value="tz.co.nezatech.apps.surveytool.form.FormInstanceActivity" />
         </activity>
+
+        <service android:name=".sync.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <service
+            android:name=".sync.SyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <provider
+            android:name=".sync.StubContentProvider"
+            android:authorities="@string/authority"
+            android:exported="false"
+            android:syncable="true" />
     </application>
 
 </manifest>
