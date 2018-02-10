@@ -40,7 +40,6 @@ import java.util.List;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
 import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.form.FormInstanceActivity;
-import tz.co.nezatech.apps.surveytool.sync.SyncAdapterManager;
 import tz.co.nezatech.apps.surveytool.util.FormUtil;
 import tz.co.nezatech.apps.surveytool.util.HttpUtil;
 import tz.co.nezatech.dev.nezahttp.HttpClient;
@@ -52,11 +51,8 @@ public class MainActivity extends AppCompatActivity
     public static final String ACCOUNT_TYPE = "nezatech.co.tz";
     public static final String ACCOUNT = "dummyaccount";
     // Sync interval constants
-    public static final long SECONDS_PER_MINUTE = 60L;
-    public static final long SYNC_INTERVAL_IN_MINUTES = 15L;
-    public static final long SYNC_INTERVAL = SYNC_INTERVAL_IN_MINUTES * SECONDS_PER_MINUTE;
+
     final String TAG = MainActivity.class.getName();
-    SyncAdapterManager syncAdapterManager;
     LayoutInflater layoutInflater = null;
     Account mAccount;
     private DatabaseHelper databaseHelper = null;
@@ -64,13 +60,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        syncAdapterManager = new SyncAdapterManager(this);
-        try {
-            syncAdapterManager.beginPeriodicSync(SYNC_INTERVAL);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

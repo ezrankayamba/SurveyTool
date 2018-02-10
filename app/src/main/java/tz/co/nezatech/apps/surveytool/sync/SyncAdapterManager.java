@@ -9,50 +9,38 @@ import android.util.Log;
 
 import tz.co.nezatech.apps.surveytool.R;
 
-import static android.content.Context.ACCOUNT_SERVICE;
-
 /**
  * Created by nkayamba on 2/7/18.
  */
 
 public class SyncAdapterManager {
     private static final String TAG = SyncAdapterManager.class.getName();
-    private final String authority;
-    private final String type;
+    private static final String SYNC_ACCOUNT = "MySyncAccount";
 
-    private Account account;
-    private Context context;
-
-    public SyncAdapterManager(final Context context) {
-        this.context = context;
-
-        type = context.getString(R.string.account_type);
-        authority = context.getString(R.string.authority);
-        account = new Account(context.getString(R.string.app_name), type);
+    public SyncAdapterManager() {
     }
 
-    public void beginPeriodicSync(final long updateConfigInterval) {
-        Log.d(TAG, "beginPeriodicSync() called with: updateConfigInterval = [" +
-                updateConfigInterval + "]");
+    @SuppressWarnings("MissingPermission")
+    public static void beginPeriodicSync(Context context, long syncFrequency) {
+        Log.d(TAG, "Configure sync adopter with frequency: " + syncFrequency + "]");
+        String type = context.getString(R.string.account_type);
+        String authority = context.getString(R.string.authority);
+        Account account = new Account(SYNC_ACCOUNT, type);
 
-        final AccountManager accountManager = (AccountManager) context
-                .getSystemService(ACCOUNT_SERVICE);
+        final AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         if (!accountManager.addAccountExplicitly(account, null, null)) {
             account = accountManager.getAccountsByType(type)[0];
+            ContentResolver.setIsSyncable(account, authority, 1);
+            Log.d(TAG, "New account added: " + account.name);
+        } else {
+            ContentResolver.setIsSyncable(account, authority, 1);
+            Log.d(TAG, "Account exist already: " + account.name);
         }
-
-        setAccountSyncable();
-
-        ContentResolver.addPeriodicSync(account, context.getString(R.string.authority),
-                Bundle.EMPTY, updateConfigInterval);
 
         ContentResolver.setSyncAutomatically(account, authority, true);
-    }
-
-    private void setAccountSyncable() {
-        if (ContentResolver.getIsSyncable(account, authority) == 0) {
-            ContentResolver.setIsSyncable(account, authority, 1);
-        }
+        ContentResolver.addPeriodicSync(account, context.getString(R.string.authority),
+                Bundle.EMPTY, syncFrequency);
+        Log.d(TAG, "Periodic sync enabled: " + syncFrequency);
     }
 }

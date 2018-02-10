@@ -54,11 +54,18 @@ public class FormInstanceActivity extends AppCompatActivity {
         displayFormInstances();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        displayFormInstances();
+    }
+
     private void displayFormInstances() {
         try {
             List<FormInstance> formInstances = getHelper().getFormInstanceDao().queryBuilder().orderBy("record_date", false).query();
             Log.d(TAG, "ListSize: " + formInstances.size());
             ListView listView = (ListView) findViewById(R.id.form_instance_list);
+
             listView.setAdapter(new ListAdapter<FormInstance>(FormInstanceActivity.this, formInstances) {
                 @Override
                 protected void handleRowClick(int position, FormInstance fi) {
@@ -74,7 +81,9 @@ public class FormInstanceActivity extends AppCompatActivity {
                     TextView txv = (TextView) v.findViewById(R.id.displayText);
                     txv.setText(p.getName());
                     ImageView syncStatusIcon = (ImageView) v.findViewById(R.id.syncStatusIcon);
-                    if (p.getStatus() > 0) {
+                    if (p.getStatus() == 0) {
+                        syncStatusIcon.setImageResource(R.mipmap.forms_sync_pending);
+                    } else {
                         syncStatusIcon.setImageResource(R.mipmap.forms_sync_done);
                     }
                     TextView lastUpdate = (TextView) v.findViewById(R.id.lastUpdate);

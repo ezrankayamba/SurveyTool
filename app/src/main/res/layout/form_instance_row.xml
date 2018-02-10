@@ -18,7 +18,7 @@
             android:layout_width="32dp"
             android:layout_height="match_parent"
             android:background="@android:color/transparent"
-            app:srcCompat="@mipmap/form_sync_pending" />
+            app:srcCompat="@mipmap/forms_sync_pending" />
 
         <LinearLayout
             android:layout_width="0dp"

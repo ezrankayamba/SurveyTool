@@ -97,4 +97,9 @@ public class FormInstance implements Serializable, Listable {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return this.name + ", " + this.status + ", " + this.uuid + ", " + this.recordDate;
+    }
 }

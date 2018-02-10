@@ -20,9 +20,12 @@ import android.preference.RingtonePreference;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.List;
+
+import tz.co.nezatech.apps.surveytool.sync.SyncAdapterManager;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -36,6 +39,8 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+    private static final String TAG = SettingsActivity.class.getName();
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -44,6 +49,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
+            Log.d(TAG, "Pref value changed. Key: " + preference.getKey() + ", Value: " + stringValue);
+
 
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in
@@ -56,6 +63,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         index >= 0
                                 ? listPreference.getEntries()[index]
                                 : null);
+
+                if (preference.getContext().getString(R.string.pref_key_sync_frequency).equals(preference.getKey())) {
+                    Log.d(TAG, "Sync frequency changed: " + stringValue);
+                    try {
+                        SyncAdapterManager.beginPeriodicSync(preference.getContext(), Long.parseLong(stringValue));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
             } else if (preference instanceof RingtonePreference) {
                 // For ringtone preferences, look up the correct display value
@@ -89,6 +105,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 } else {
                     // For all other preferences, set the summary to the value's
                     // simple string representation.
+
                     preference.setSummary(stringValue);
                 }
 

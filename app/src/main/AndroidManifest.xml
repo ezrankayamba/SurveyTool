@@ -5,13 +5,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Permissions required by the sync adapter -->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission
-        android:name="android.permission.USE_CREDENTIALS"
-        android:maxSdkVersion="22" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
@@ -68,7 +65,9 @@
                 android:value="tz.co.nezatech.apps.surveytool.form.FormInstanceActivity" />
         </activity>
 
-        <service android:name=".sync.AuthenticatorService">
+        <service
+            android:name=".sync.AuthenticatorService"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -78,6 +77,7 @@
         </service>
         <service
             android:name=".sync.SyncService"
+            android:enabled="true"
             android:exported="true"
             android:process=":sync">
             <intent-filter>
@@ -91,6 +91,7 @@
         <provider
             android:name=".sync.StubContentProvider"
             android:authorities="@string/authority"
+            android:enabled="true"
             android:exported="false"
             android:syncable="true" />
     </application>
