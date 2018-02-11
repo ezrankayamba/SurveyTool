@@ -95,4 +95,5 @@
     <string name="authority">tz.co.nezatech.apps.surveytool.sync</string>
     <string name="account_type">nezatech.co.tz</string>
     <string name="pref_key_sync_frequency">sync_frequency</string>
+    <string name="list_filter_hint">Enter your search text here</string>
 </resources>

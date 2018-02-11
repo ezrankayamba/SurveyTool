@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="tz.co.nezatech.apps.surveytool.form.FormInstanceActivity"
     tools:showIn="@layout/activity_form_instance">
@@ -17,13 +18,16 @@
         app:layout_constraintTop_toBottomOf="parent">
 
         <SearchView
+            android:id="@+id/searchText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/secondaryLightColor" />
+            android:background="@color/secondaryLightColor"
+            android:iconifiedByDefault="false" />
 
         <ListView
             android:id="@+id/form_instance_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

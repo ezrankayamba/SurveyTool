@@ -102,4 +102,9 @@ public class FormInstance implements Serializable, Listable {
     public String toString() {
         return this.name + ", " + this.status + ", " + this.uuid + ", " + this.recordDate;
     }
+
+    @Override
+    public String searchableText() {
+        return toString();
+    }
 }

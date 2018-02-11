@@ -10,13 +10,13 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/syncStatusIcon"
-            android:layout_width="32dp"
-            android:layout_height="match_parent"
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             app:srcCompat="@mipmap/forms_sync_pending" />
 
@@ -24,12 +24,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/displayText"
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:text="TextView"
                 android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
@@ -37,9 +38,7 @@
             <TextView
                 android:id="@+id/lastUpdate"
                 android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:layout_weight="0.66"
-                android:gravity="top"
+                android:layout_height="wrap_content"
                 android:text="TextView"
                 android:textSize="10sp"
                 android:textStyle="italic"
@@ -49,7 +48,7 @@
         <ImageView
             android:id="@+id/forwardArrow"
             android:layout_width="36dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             app:srcCompat="@mipmap/menu_list_arrow_right" />
     </LinearLayout>

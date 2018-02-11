@@ -1,11 +1,16 @@
 package tz.co.nezatech.apps.surveytool.util;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,10 +21,22 @@ import java.util.List;
 public abstract class ListAdapter<L extends Listable> extends ArrayAdapter<L> implements View.OnClickListener {
 
 
+    private static final String TAG = ListAdapter.class.getName();
+    List<L> dataSet;
+    List<L> dataSetOrg;
     private int lastPosition = -1;
+    private Filter filter;
+    private TextWatcher textWatcher;
 
     public ListAdapter(Context context, List<L> dataSet) {
         super(context, 0, dataSet);
+        this.dataSet = dataSet;
+        this.dataSetOrg = dataSet;
+        textWatcher = new ListFilterTextWatcher(this);
+    }
+
+    public TextWatcher getTextWatcher() {
+        return this.textWatcher;
     }
 
     @Override
@@ -53,8 +70,136 @@ public abstract class ListAdapter<L extends Listable> extends ArrayAdapter<L> im
         return v;
     }
 
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+    }
+
+
+    @Override
+    public int getCount() {
+        return dataSet.size();
+    }
+
+    @Override
+    public L getItem(int position) {
+        return dataSet.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                final FilterResults oReturn = new FilterResults();
+                final ArrayList<L> results = new ArrayList<L>();
+                if (constraint != null) {
+                    if (dataSetOrg != null && dataSetOrg.size() > 0) {
+                        for (final L e : dataSetOrg) {
+                            if (e.searchableText().toLowerCase()
+                                    .contains(constraint.toString()))
+                                results.add(e);
+                        }
+                    }
+                    oReturn.values = results;
+                }
+                return oReturn;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint,
+                                          FilterResults results) {
+                dataSet = (ArrayList<L>) results.values;
+                notifyDataSetChanged();
+                Log.d(TAG, "Set changed");
+            }
+        };
+    }
+
     protected abstract void makeRowView(View v, L p);
 
     protected abstract int getRowLayoutResource();
+
+    private class AppFilter<T extends Searchable> extends Filter {
+
+        private List<T> sourceObjects;
+
+        public AppFilter(List<T> objects) {
+            sourceObjects = new ArrayList<T>();
+            synchronized (this) {
+                sourceObjects.addAll(objects);
+            }
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence chars) {
+            String filterSeq = chars.toString().toLowerCase();
+            FilterResults result = new FilterResults();
+            if (filterSeq != null && filterSeq.length() > 0) {
+                ArrayList<T> filter = new ArrayList<T>();
+
+                for (T object : sourceObjects) {
+                    // the filtering itself:
+                    if (object.searchableText().toLowerCase().contains(filterSeq))
+                        filter.add(object);
+                }
+                result.count = filter.size();
+                result.values = filter;
+            } else {
+                // add all objects
+                synchronized (this) {
+                    result.values = sourceObjects;
+                    result.count = sourceObjects.size();
+                }
+            }
+            return result;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint,
+                                      FilterResults results) {
+            // NOTE: this function is *always* called from the UI thread.
+            ArrayList<T> filtered = (ArrayList<T>) results.values;
+            notifyDataSetChanged();
+            clear();
+            for (int i = 0, l = filtered.size(); i < l; i++)
+                add((L) filtered.get(i));
+            notifyDataSetInvalidated();
+        }
+    }
+
+    public class ListFilterTextWatcher implements TextWatcher {
+        private ListAdapter adapter;
+
+        public ListFilterTextWatcher(ListAdapter adapter) {
+            this.adapter = adapter;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (adapter != null) {
+                adapter.getFilter().filter(s);
+            } else {
+                Log.d("filter", "no filter availible");
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    }
 
 }
