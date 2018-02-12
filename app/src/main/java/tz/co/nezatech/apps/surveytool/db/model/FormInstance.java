@@ -105,6 +105,6 @@ public class FormInstance implements Serializable, Listable {
 
     @Override
     public String searchableText() {
-        return toString();
+        return toString() + this.getJson();
     }
 }

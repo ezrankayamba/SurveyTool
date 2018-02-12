@@ -5,6 +5,10 @@
     <color name="primaryDarkColor">#003c8f</color>
     <color name="secondaryColor">#546e7a</color>
     <color name="secondaryLightColor">#819ca9</color>
+    <color name="tertiaryDarkColor">#E9E9E9</color>
+    <color name="tertiaryColor">#F0F0F0</color>
+    <color name="tertiaryLightColor">#F6F6F6</color>
+    <color name="tertiaryTextColor">#546e7a</color>
     <color name="secondaryDarkColor">#29434e</color>
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#ffffff</color>

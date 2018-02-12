@@ -96,4 +96,11 @@
     <string name="account_type">nezatech.co.tz</string>
     <string name="pref_key_sync_frequency">sync_frequency</string>
     <string name="list_filter_hint">Enter your search text here</string>
+    <string name="title_activity_summary">My Survey Summary</string>
+    <string name="drawer_title_settings">Settings</string>
+    <string name="drawer_title_communicate">Communicate</string>
+    <string name="drawer_title_summary">Survey Summary</string>
+    <string name="nav_add_dummy_records">Add Dummy Forms</string>
+    <string name="summary_filter_hint">Enter date to filter (yyyy-MM-dd)</string>
+    <string name="nav_remove_dummy_records">Remove Dummy Records</string>
 </resources>

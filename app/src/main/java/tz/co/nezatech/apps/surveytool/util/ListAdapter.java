@@ -1,8 +1,6 @@
 package tz.co.nezatech.apps.surveytool.util;
 
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,18 +23,11 @@ public abstract class ListAdapter<L extends Listable> extends ArrayAdapter<L> im
     List<L> dataSet;
     List<L> dataSetOrg;
     private int lastPosition = -1;
-    private Filter filter;
-    private TextWatcher textWatcher;
 
     public ListAdapter(Context context, List<L> dataSet) {
         super(context, 0, dataSet);
         this.dataSet = dataSet;
         this.dataSetOrg = dataSet;
-        textWatcher = new ListFilterTextWatcher(this);
-    }
-
-    public TextWatcher getTextWatcher() {
-        return this.textWatcher;
     }
 
     @Override
@@ -174,32 +165,4 @@ public abstract class ListAdapter<L extends Listable> extends ArrayAdapter<L> im
             notifyDataSetInvalidated();
         }
     }
-
-    public class ListFilterTextWatcher implements TextWatcher {
-        private ListAdapter adapter;
-
-        public ListFilterTextWatcher(ListAdapter adapter) {
-            this.adapter = adapter;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (adapter != null) {
-                adapter.getFilter().filter(s);
-            } else {
-                Log.d("filter", "no filter availible");
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    }
-
 }

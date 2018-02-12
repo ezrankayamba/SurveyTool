@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -68,7 +69,7 @@ public class FormInstanceActivity extends AppCompatActivity {
             Log.d(TAG, "ListSize: " + formInstances.size());
             final ListView mListView = (ListView) findViewById(R.id.form_instance_list);
 
-            ListAdapter<FormInstance> fiAdapter = new ListAdapter<FormInstance>(FormInstanceActivity.this, formInstances) {
+            ListAdapter<FormInstance> adapter = new ListAdapter<FormInstance>(FormInstanceActivity.this, formInstances) {
                 @Override
                 protected void handleRowClick(int position, FormInstance fi) {
                     Log.d(TAG, "JSON: " + fi.getJson());
@@ -98,8 +99,10 @@ public class FormInstanceActivity extends AppCompatActivity {
                     return R.layout.form_instance_row;
                 }
             };
-            mListView.setAdapter(fiAdapter);
-            mListView.setTextFilterEnabled(true);
+            mListView.setAdapter(adapter);
+            mListView.setTextFilterEnabled(false);
+
+            final Filter filter = adapter.getFilter();
 
             SearchView mSearchView = (SearchView) findViewById(R.id.searchText);
             mSearchView.setIconifiedByDefault(false);
@@ -115,8 +118,10 @@ public class FormInstanceActivity extends AppCompatActivity {
                     Log.d(TAG, "Query text changed: " + newText);
                     if (TextUtils.isEmpty(newText)) {
                         mListView.clearTextFilter();
+                        filter.filter("");
                     } else {
                         mListView.setFilterText(newText);
+                        filter.filter(newText);
                     }
                     return true;
                 }

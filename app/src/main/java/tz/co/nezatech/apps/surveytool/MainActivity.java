@@ -40,6 +40,7 @@ import java.util.List;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
 import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.form.FormInstanceActivity;
+import tz.co.nezatech.apps.surveytool.summary.SummaryActivity;
 import tz.co.nezatech.apps.surveytool.util.FormUtil;
 import tz.co.nezatech.apps.surveytool.util.HttpUtil;
 import tz.co.nezatech.dev.nezahttp.HttpClient;
@@ -176,10 +177,16 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        } else if (id == R.id.nav_summary) {
+            Intent intent = new Intent(this, SummaryActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_dummy_records) {
+            Log.d(TAG, "Adding dummy");
+            int limit = 10;
+            SummaryActivity.dummyRecords(getHelper(), limit);
+        } else if (id == R.id.nav_dummy_records_remove) {
+            Log.d(TAG, "Removing dummy");
+            SummaryActivity.dummyRecordsRemove(getHelper());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

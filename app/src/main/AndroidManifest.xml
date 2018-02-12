@@ -71,6 +71,7 @@
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
@@ -83,6 +84,7 @@
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
             </intent-filter>
+
             <meta-data
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
@@ -94,6 +96,16 @@
             android:enabled="true"
             android:exported="false"
             android:syncable="true" />
+
+        <activity
+            android:name=".summary.SummaryActivity"
+            android:label="@string/title_activity_summary"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="tz.co.nezatech.apps.surveytool.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
