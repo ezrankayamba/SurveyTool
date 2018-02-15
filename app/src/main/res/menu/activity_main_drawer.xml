@@ -26,6 +26,10 @@
                 android:id="@+id/nav_dummy_records_remove"
                 android:icon="@drawable/ic_menu_send"
                 android:title="@string/nav_remove_dummy_records" />
+            <item
+                android:id="@+id/nav_gps_check"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/nav_gps_check" />
         </menu>
     </item>
 

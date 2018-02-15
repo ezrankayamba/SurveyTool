@@ -89,6 +89,10 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
+        <service
+            android:name=".location.LocationService"
+            android:enabled="true"
+            android:exported="false" />
 
         <provider
             android:name=".sync.StubContentProvider"
@@ -100,6 +104,15 @@
         <activity
             android:name=".summary.SummaryActivity"
             android:label="@string/title_activity_summary"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="tz.co.nezatech.apps.surveytool.MainActivity" />
+        </activity>
+        <activity
+            android:name=".location.LocationActivity"
+            android:label="@string/title_activity_location"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

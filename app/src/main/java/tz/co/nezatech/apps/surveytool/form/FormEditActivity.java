@@ -1,33 +1,35 @@
 package tz.co.nezatech.apps.surveytool.form;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -46,22 +48,45 @@ import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
 import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
+import tz.co.nezatech.apps.surveytool.location.LocationService;
 import tz.co.nezatech.apps.surveytool.util.FormUtil;
 import tz.co.nezatech.apps.surveytool.util.Group;
 import tz.co.nezatech.apps.surveytool.util.Input;
 import tz.co.nezatech.apps.surveytool.util.Instance;
 
+import static tz.co.nezatech.apps.surveytool.location.LocationService.LocationServiceListener;
 
-public class FormEditActivity extends AppCompatActivity implements LocationListener {
+
+public class FormEditActivity extends AppCompatActivity implements LocationServiceListener {
     final String TAG = FormEditActivity.class.getName();
+    public LocationService locationService;
     Form form;
     FormInstance formInstance = null;
     LayoutInflater layoutInflater = null;
+    Location currentLocation = null;
     private DatabaseHelper databaseHelper = null;
-    private LocationManager locationManager;
     private String provider;
     private LinkedHashMap<String, LinkedHashMap<String, EditText>> locationMap = new LinkedHashMap<>();
     private List<LocationChangeListener> locationChangeListenerList = new LinkedList<>();
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            String name = className.getClassName();
+
+            if (name.endsWith("LocationService")) {
+                locationService = ((LocationService.LocationServiceBinder) service).getService();
+                locationService.setListener(FormEditActivity.this);
+                locationService.startUpdatingLocation();
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            if (className.getClassName().equals("LocationService")) {
+                locationService.stopUpdatingLocation();
+                locationService = null;
+                currentLocation = null;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,20 +103,17 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
 
         formInstance = (FormInstance) intent.getSerializableExtra(FormUtil.FORM_INSTANCE_DATA);
 
-        // Get the location manager
-        locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        // Define the criteria how to select the locatioin provider -> use
-        // default
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria, false);
-
-
         initForm();
+        final Intent serviceStart = new Intent(this.getApplication(), LocationService.class);
+        this.getApplication().startService(serviceStart);
+        this.getApplication().bindService(serviceStart, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void initForm() {
         try {
             final LinearLayout mainLayout = (LinearLayout) findViewById(R.id.form_edit_layout);
+            mainLayout.removeAllViews();
+            mainLayout.refreshDrawableState();
 
             FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
@@ -144,22 +166,8 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        Toast.makeText(this, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        Toast.makeText(this, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     public void onLocationChanged(Location location) {
+        this.currentLocation = location;
         if (!getLocationMap().isEmpty()) {
             for (String locld : getLocationMap().keySet()) {
                 LinkedHashMap<String, EditText> latLong = getLocationMap().get(locld);
@@ -264,6 +272,11 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
                 text.setSingleLine(false);
                 text.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
             }
+
+            //changelistener
+            FormInputTextWatcher watcher = new FormInputTextWatcher(text);
+
+
             form.addView(text);
 
             setInputTag(input, text);
@@ -292,11 +305,35 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
         return views;
     }
 
-    public void refreshLocGPS() {
+    public boolean checkFormInputsRegex(ViewGroup root) {
+        final int childCount = root.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = root.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                if (!checkFormInputsRegex((ViewGroup) child)) {
+                    return false;
+                }
+            } else {
+                if (child.getTag() != null && !child.getTag().toString().isEmpty()) {
+                    if (child instanceof EditText) {
+                        EditText et = (EditText) child;
+                        if (!regexCheck(et)) {
+                            Log.e(TAG, "checkFormInputsRegex->NOK: " + String.format("Value->%s, Tag->%s", ((EditText) child).getText(), child.getTag()));
+                            return false;
+                        } else {
+                            Log.d(TAG, "checkFormInputsRegex->OK: " + String.format("Value->%s, Tag->%s", ((EditText) child).getText(), child.getTag()));
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public void refreshLocGPS(View view) {
         try {
             Log.d(TAG, "Refreshing GPS");
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // Should we show an explanation?
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
                     Log.d(TAG, "Refreshing GPS: Should show...");
@@ -304,14 +341,14 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);// request code =1; for location
                     Log.d(TAG, "Refreshing GPS: Show!?");
                 }
-
             } else {
-                Log.d(TAG, "Refreshing GPS: Proceed => " + provider);
                 Location location = getLastKnownLocation();
-                // Initialize the location fields
                 if (location != null) {
-                    Log.d(TAG, "Provider " + provider + " has been selected.");
+                    Log.d(TAG, "Provider " + location.getProvider() + " has been selected.");
                     onLocationChanged(location);
+                } else {
+                    Snackbar.make(view, "Make sure GPS is turned ON", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
             }
         } catch (Exception e) {
@@ -320,23 +357,7 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
     }
 
     private Location getLastKnownLocation() {
-        List<String> providers = locationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            try {
-                Location l = locationManager.getLastKnownLocation(provider);
-                if (l == null) {
-                    continue;
-                }
-                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                    // Found best last known location: %s", l);
-                    bestLocation = l;
-                }
-            } catch (SecurityException se) {
-                se.printStackTrace();
-            }
-        }
-        return bestLocation;
+        return this.currentLocation;
     }
 
     public LinkedHashMap<String, LinkedHashMap<String, EditText>> getLocationMap() {
@@ -363,7 +384,7 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refreshLocGPS();
+                refreshLocGPS(v);
             }
         });
 
@@ -406,7 +427,34 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
             }
         });
 
-        refreshLocGPS();
+        refreshLocGPS(btn);
+    }
+
+    String getGroupLabel(String grpName) {
+        String label = null;
+        try {
+            Log.d(TAG, "getGroupLabel: " + String.format("Group->%s", grpName));
+            List<String> v = JsonPath.read(form.getJson(), "$.groups[?(@.name == '" + grpName + "')].label");
+            label = v.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "JSON: " + form.getJson());
+        }
+        return label;
+    }
+
+    String getInputLabel(String inpName) {
+        String label = null;
+        try {
+            String grpName = inpName.split("\\.")[0];
+            Log.d(TAG, "getInputLabel: " + String.format("Group->%s, Input->%s", grpName, inpName));
+            List<String> v = JsonPath.read(form.getJson(), "$.groups[?(@.name == '" + grpName + "')].inputs[?(@.name == '" + inpName + "')].label");
+            label = v.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "JSON: " + form.getJson());
+        }
+        return label;
     }
 
     private DataElem dataFromView(View v) {
@@ -426,10 +474,11 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
             String name = tokens[1];
             String type = tokens[2];
             boolean success = true;
-
+            boolean isGroup = false;
             switch (category) {
                 case "GRP":
                     value = "NA: This is a group";
+                    isGroup = true;
                     break;
                 case "INP":
                     if (v instanceof EditText) {
@@ -508,7 +557,7 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
                     success = false;
                     break;
             }
-            dataElem = new DataElem(name, type, category, value);
+            dataElem = new DataElem(name, type, category, value, isGroup ? getGroupLabel(name) : getInputLabel(name));
             dataElem.setSuccess(success);
         }
 
@@ -520,59 +569,62 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
         try {
             Log.d(TAG, String.format("Id: %d, Name: %s", form.getId(), form.getName()));
 
-            ArrayList<View> viewsWithTag = getViewsWithTag(root);
+            if (checkFormInputsRegex(root)) {
+                ArrayList<View> viewsWithTag = getViewsWithTag(root);
 
-            List<DataElem> list = new LinkedList<>();
-            Instance instance = new Instance(form.getFormId());
-            List<Group> groups = new LinkedList<>();
-            List<Input> inputs = null;
-            Group group = null;
-            //String display = "NIL";
-            ArrayList<String> displayList = new ArrayList<>();
-            String tmpl = form.getDisplay();
-            for (View v : viewsWithTag) {
-                DataElem dataElem = dataFromView(v);
-                if (dataElem.getCategory().equals("GRP")) {
-                    //check prev
-                    if (group != null) {//first grp, ignore
-                        group.setInputs(inputs);
-                        groups.add(group);
-                    }
-                    group = new Group(dataElem.getCategory(), dataElem.getName(), dataElem.getType());
-                    inputs = new LinkedList<>();
-                } else if (dataElem.getCategory().equals("INP")) {
-                    inputs.add(new Input(dataElem.getCategory(), dataElem.getName(), dataElem.getType(), dataElem.getValue()));
+                List<DataElem> list = new LinkedList<>();
+                Instance instance = new Instance(form.getFormId());
+                List<Group> groups = new LinkedList<>();
+                List<Input> inputs = null;
+                Group group = null;
+                //String display = "NIL";
+                ArrayList<String> displayList = new ArrayList<>();
+                String tmpl = form.getDisplay();
+                for (View v : viewsWithTag) {
+                    DataElem dataElem = dataFromView(v);
+                    if (dataElem.getCategory().equals("GRP")) {
+                        //check prev
+                        if (group != null) {//first grp, ignore
+                            group.setInputs(inputs);
+                            groups.add(group);
+                        }
+                        group = new Group(dataElem.getCategory(), dataElem.getName(), dataElem.getType(), dataElem.getLabel());
+                        inputs = new LinkedList<>();
+                    } else if (dataElem.getCategory().equals("INP")) {
+                        inputs.add(new Input(dataElem.getCategory(), dataElem.getName(), dataElem.getType(), dataElem.getValue(), dataElem.getLabel()));
 
-                    if (tmpl.contains(dataElem.getName())) {
-                        tmpl = tmpl.replaceAll(dataElem.getName(), dataElem.getValue());
+                        if (tmpl.contains(dataElem.getName())) {
+                            tmpl = tmpl.replaceAll(dataElem.getName(), dataElem.getValue());
+                        }
                     }
                 }
-            }
-            if (group != null && inputs != null) {//first grp, ignore
-                group.setInputs(inputs);
-                groups.add(group);
-            }
-            instance.setGroups(groups);
-
-            try {
-                Gson gson = new Gson();
-                String json = gson.toJson(instance);
-                Log.d(TAG, "JSON: " + json);
-                Log.d(TAG, "Display: " + tmpl);
-
-                FormInstance newInstance = new FormInstance(form, json, tmpl);
-                if (formInstance != null) {
-                    newInstance.setId(formInstance.getId());
-                    getHelper().getFormInstanceDao().update(newInstance);
-                } else {
-                    getHelper().getFormInstanceDao().create(newInstance);
+                if (group != null && inputs != null) {//first grp, ignore
+                    group.setInputs(inputs);
+                    groups.add(group);
                 }
+                instance.setGroups(groups);
 
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
+                try {
+                    Gson gson = new Gson();
+                    String json = gson.toJson(instance);
+                    Log.d(TAG, "JSON: " + json);
+                    Log.d(TAG, "Display: " + tmpl);
+
+                    FormInstance newInstance = new FormInstance(form, json, tmpl);
+                    if (formInstance != null) {
+                        newInstance.setId(formInstance.getId());
+                        getHelper().getFormInstanceDao().update(newInstance);
+                    } else {
+                        getHelper().getFormInstanceDao().create(newInstance);
+                    }
+
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e(TAG, "Valdation failed");
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -597,7 +649,79 @@ public class FormEditActivity extends AppCompatActivity implements LocationListe
         }
     }
 
+    private boolean regexCheck(EditText txt) {
+        try {
+            //EditText txt = editText;
+            Object tag = txt.getTag();
+            String regex = null;
+            String regexMessage = null;
+            try {
+                String name = tag.toString().split(":")[1];
+                List<String> rgx = JsonPath.read(form.getJson(), "$.groups[?(@.name == '" + name.split("\\.")[0] + "')].inputs[?(@.name == '" + name + "')].regex");
+                regex = rgx.get(0);
+                List<String> rgxMsg = JsonPath.read(form.getJson(), "$.groups[?(@.name == '" + name.split("\\.")[0] + "')].inputs[?(@.name == '" + name + "')].regexMessage");
+                regexMessage = rgxMsg.get(0);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "Exception: " + e.getMessage());
+            }
+
+            if (regex != null) {
+                String value = txt.getText().toString();
+                if (value == null) {
+                    value = "";
+                }
+                if (value.matches(regex)) {
+                    Log.d(TAG, "Validation-OK");
+                    txt.setError(null);
+                    txt.setFocusableInTouchMode(false);
+                    return true;
+                } else {
+                    Log.e(TAG, "Validation-NOK: " + String.format("Value->%s, Regex->%s", value, regex));
+                    txt.setError(regexMessage);
+                    txt.setFocusableInTouchMode(true);
+                    txt.requestFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
+                    /*if (scrollView!=null){
+                        scrollView.scrollTo(0, (int) txt.getY()+100);
+                    }*/
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "Exception: " + e.getMessage());
+        }
+
+        return false;
+    }
+
     public interface LocationChangeListener {
         void locationChanged(Location location);
+    }
+
+    class FormInputTextWatcher implements TextWatcher {
+        EditText editText;
+
+        public FormInputTextWatcher(EditText editText) {
+            this.editText = editText;
+            this.editText.addTextChangedListener(this);
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            Log.d(TAG, "afterTextChanged");
+            regexCheck(editText);
+        }
     }
 }

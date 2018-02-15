@@ -7,13 +7,22 @@ import java.util.List;
  */
 
 public class Group {
-    private String category, name, type;
+    private String category, name, type, label;
     private List<Input> inputs;
 
-    public Group(String category, String name, String type) {
+    public Group(String category, String name, String type, String label) {
         this.category = category;
         this.name = name;
         this.type = type;
+        this.label = label;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public List<Input> getInputs() {

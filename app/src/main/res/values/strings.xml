@@ -103,4 +103,6 @@
     <string name="nav_add_dummy_records">Add Dummy Forms</string>
     <string name="summary_filter_hint">Enter date to filter (yyyy-MM-dd)</string>
     <string name="nav_remove_dummy_records">Remove Dummy Records</string>
+    <string name="title_activity_location">LocationActivity</string>
+    <string name="nav_gps_check">GPS Check</string>
 </resources>

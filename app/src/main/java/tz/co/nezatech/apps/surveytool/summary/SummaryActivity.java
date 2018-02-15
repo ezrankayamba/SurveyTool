@@ -50,10 +50,10 @@ public class SummaryActivity extends AppCompatActivity {
                 for (int i = 0; i < limit; i++) {
                     try {
                         Instance instance = new Instance(form.getFormId());
-                        Group group = new Group("DCategory1", "DummyGrp1", "DGrpType1");
+                        Group group = new Group("DCategory1", "DummyGrp1", "DGrpType1", "DummyLabel");
                         List<Input> inputs = new ArrayList<>();
                         for (int j = 0; j < 2; j++) {
-                            Input inp = new Input("ICategory" + i + "" + j, "ICategory" + i + "" + j + ".DInput" + i + "" + j, "DInputType" + i + "" + j, "DValue" + i + "" + j);
+                            Input inp = new Input("ICategory" + i + "" + j, "ICategory" + i + "" + j + ".DInput" + i + "" + j, "DInputType" + i + "" + j, "DValue" + i + "" + j, "DummyLabel");
                             inputs.add(inp);
                         }
                         group.setInputs(inputs);
