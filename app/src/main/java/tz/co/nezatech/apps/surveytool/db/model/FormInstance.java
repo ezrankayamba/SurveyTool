@@ -1,5 +1,7 @@
 package tz.co.nezatech.apps.surveytool.db.model;
 
+import android.util.Log;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -16,6 +18,7 @@ import tz.co.nezatech.apps.surveytool.util.Listable;
  */
 @DatabaseTable(tableName = "tbl_form_instance")
 public class FormInstance implements Serializable, Listable {
+    static final String TAG = FormInstance.class.getName();
     @DatabaseField(generatedId = true)
     int id;
     @DatabaseField(index = true, unique = true)
@@ -40,6 +43,7 @@ public class FormInstance implements Serializable, Listable {
         this.name = FormUtil.formInstanceName(form, getRecordDate(), display);
         this.form = form;
         this.json = json;
+        Log.d(TAG, String.format("Form: %s, Id: %d, Form Repos Id: %d", form, form.getId(), form.getFormId()));
     }
 
     public int getId() {

@@ -23,7 +23,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile files('libs/ormlite-core-5.0.jar')
+    //compile files('libs/ormlite-core-5.1.jar')
     compile files('libs/nezahttp-1.0.0.jar')
     compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
     compile 'com.android.support:support-core-utils:25.4.0'

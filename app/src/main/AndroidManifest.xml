@@ -50,6 +50,7 @@
             android:label="@string/title_activity_form_edit"
             android:launchMode="singleTop"
             android:parentActivityName=".form.FormInstanceActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -59,6 +60,7 @@
             android:name=".form.FormViewActivity"
             android:label="@string/title_activity_form_view"
             android:parentActivityName=".form.FormInstanceActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

@@ -14,16 +14,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -43,6 +40,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
@@ -274,9 +272,14 @@ public class FormEditActivity extends AppCompatActivity implements LocationServi
             }
 
             //changelistener
-            FormInputTextWatcher watcher = new FormInputTextWatcher(text);
+            FormInputTextWatcher watcher = new FormInputTextWatcher(this, text) {
 
-
+                @Override
+                public void validateInput(EditText inputField) {
+                    regexCheck(inputField, false);
+                }
+            };
+            
             form.addView(text);
 
             setInputTag(input, text);
@@ -317,7 +320,7 @@ public class FormEditActivity extends AppCompatActivity implements LocationServi
                 if (child.getTag() != null && !child.getTag().toString().isEmpty()) {
                     if (child instanceof EditText) {
                         EditText et = (EditText) child;
-                        if (!regexCheck(et)) {
+                        if (!regexCheck(et, true)) {
                             Log.e(TAG, "checkFormInputsRegex->NOK: " + String.format("Value->%s, Tag->%s", ((EditText) child).getText(), child.getTag()));
                             return false;
                         } else {
@@ -649,7 +652,7 @@ public class FormEditActivity extends AppCompatActivity implements LocationServi
         }
     }
 
-    private boolean regexCheck(EditText txt) {
+    private boolean regexCheck(EditText txt, boolean onSubmit) {
         try {
             //EditText txt = editText;
             Object tag = txt.getTag();
@@ -671,21 +674,20 @@ public class FormEditActivity extends AppCompatActivity implements LocationServi
                 if (value == null) {
                     value = "";
                 }
-                if (value.matches(regex)) {
+                Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
+                if (p.matcher(value).find()) {
                     Log.d(TAG, "Validation-OK");
                     txt.setError(null);
-                    txt.setFocusableInTouchMode(false);
+                    //txt.setFocusableInTouchMode(false);
                     return true;
                 } else {
                     Log.e(TAG, "Validation-NOK: " + String.format("Value->%s, Regex->%s", value, regex));
                     txt.setError(regexMessage);
-                    txt.setFocusableInTouchMode(true);
-                    txt.requestFocus();
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(txt.getWindowToken(), 0);
-                    /*if (scrollView!=null){
-                        scrollView.scrollTo(0, (int) txt.getY()+100);
-                    }*/
+
+                    if (onSubmit) {
+                        txt.setFocusableInTouchMode(true);
+                        txt.requestFocus();
+                    }
                 }
             }
         } catch (Exception e) {
@@ -700,28 +702,4 @@ public class FormEditActivity extends AppCompatActivity implements LocationServi
         void locationChanged(Location location);
     }
 
-    class FormInputTextWatcher implements TextWatcher {
-        EditText editText;
-
-        public FormInputTextWatcher(EditText editText) {
-            this.editText = editText;
-            this.editText.addTextChangedListener(this);
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            Log.d(TAG, "afterTextChanged");
-            regexCheck(editText);
-        }
-    }
 }

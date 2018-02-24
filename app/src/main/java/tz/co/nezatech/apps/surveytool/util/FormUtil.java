@@ -1,5 +1,8 @@
 package tz.co.nezatech.apps.surveytool.util;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import tz.co.nezatech.apps.surveytool.db.model.Form;
@@ -15,5 +18,10 @@ public class FormUtil {
 
     public static final String formInstanceName(Form form, Date recordDate, String display) {
         return String.format("%s: %s", form.getName(), display);
+    }
+
+    public static final Date fromStr(String str) throws ParseException {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        return df.parse(str);
     }
 }

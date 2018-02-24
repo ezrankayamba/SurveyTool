@@ -15,6 +15,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -65,10 +66,14 @@ public class FormInstanceActivity extends AppCompatActivity {
 
     private void displayFormInstances() {
         try {
-            List<FormInstance> formInstances = getHelper().getFormInstanceDao().queryBuilder().orderBy("record_date", false).query();
-            Log.d(TAG, "ListSize: " + formInstances.size());
+            QueryBuilder<FormInstance, Integer> qb = getHelper().getFormInstanceDao().queryBuilder();
+            qb.where().like("json", "%\"formId\":" + form.getFormId() + "%");
+            qb.orderBy("record_date", false);
+            List<FormInstance> formInstances = getHelper().getFormInstanceDao().query(qb.prepare());
+            for (FormInstance fi : formInstances) {
+                Log.d(TAG, String.format("Name: %s, Form: %s", fi.getName(), fi.getForm()));
+            }
             final ListView mListView = (ListView) findViewById(R.id.form_instance_list);
-
             ListAdapter<FormInstance> adapter = new ListAdapter<FormInstance>(FormInstanceActivity.this, formInstances) {
                 @Override
                 protected void handleRowClick(int position, FormInstance fi) {
@@ -126,7 +131,6 @@ public class FormInstanceActivity extends AppCompatActivity {
                     return true;
                 }
             });
-            //mSearchView.setSubmitButtonEnabled(true);
             mSearchView.setQueryHint(getString(R.string.list_filter_hint));
             mSearchView.clearFocus();
         } catch (Exception e) {

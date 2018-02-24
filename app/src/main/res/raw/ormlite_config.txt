@@ -1,5 +1,5 @@
 #
-# generated on 2018/02/07 01:06:04
+# generated on 2018/02/24 11:03:32
 #
 # --table-start--
 dataClass=tz.co.nezatech.apps.surveytool.db.model.FormInstance
@@ -64,6 +64,25 @@ fieldName=json
 # --field-end--
 # --field-start--
 fieldName=display
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=tz.co.nezatech.apps.surveytool.summary.SummaryLine
+tableName=summaryline
+# --table-fields-start--
+# --field-start--
+fieldName=syncedCount
+# --field-end--
+# --field-start--
+fieldName=unsyncedCount
+# --field-end--
+# --field-start--
+fieldName=total
+# --field-end--
+# --field-start--
+fieldName=date
 # --field-end--
 # --table-fields-end--
 # --table-end--
