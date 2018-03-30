@@ -37,6 +37,8 @@
 
     <string name="pref_title_sync_frequency">Sync frequency</string>
     <string-array name="pref_sync_frequency_titles">
+        <item>1 minute</item>
+        <item>5 minutes</item>
         <item>15 minutes</item>
         <item>30 minutes</item>
         <item>1 hour</item>
@@ -45,6 +47,8 @@
         <item>Never</item>
     </string-array>
     <string-array name="pref_sync_frequency_values">
+        <item>1</item>
+        <item>5</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>
@@ -105,4 +109,25 @@
     <string name="nav_remove_dummy_records">Remove Dummy Records</string>
     <string name="title_activity_location">LocationActivity</string>
     <string name="nav_gps_check">GPS Check</string>
+    <string name="title_activity_ocr">OCRActivity</string>
+    <string name="ocr_instruction">Start OCR and capture texts!</string>
+    <string name="ocrBtnCopyClcBrd">Copy to clickboard</string>
+    <string name="ocrBtnCaptureText">Capture Text</string>
+    <string name="nav_ocr_capture">OCR Capture</string>
+    <string name="gps_network_not_enabled">GPS is not enabled. Open location settings to enbale before you proceed as GPS is required on this survey</string>
+    <string name="open_location_settings">Open location settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="form_regex_setup_template">^Setup\\.(\\w+)$</string>
+    <string name="form_regex_select_template">^Select\\[([ a-zA-Z0-9,]+)]$</string>
+    <string name="form_inputlabel_jsonpath">$.groups[?(@.name == \'%s\')].inputs[?(@.name == \'%s\')].label</string>
+    <string name="form_grouplabel_jsonpath">$.groups[?(@.name == \'%s\')].label</string>
+    <string name="form_input_error_notvalid_inputorgroup">Error: not valid input or group</string>
+    <string name="txn_sample_text1">Text1</string>
+    <string name="form_input_checkother_enter_details_here">Enter details here</string>
+    <string name="txt_search_instances">Search</string>
+    <string name="label_sample_title">Sample Title</string>
+    <string name="label_sample_description">Description</string>
+    <string name="constTextOthersSpecify">OthersSpecify</string>
+    <string name="formCheckBoxOtherSpecifyNewLabel">Specify others</string>
+    <string name="formRadioGroupOtherSpecifyNewLabel">Specify others</string>
 </resources>

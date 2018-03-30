@@ -5,18 +5,20 @@ package tz.co.nezatech.apps.surveytool.form;
  */
 
 public class DataElem {
-    private String name, type, category, value, label;
+    private String name, type, category, label;
+    private Object extra, value;
     private boolean success = true;
 
     public DataElem() {
     }
 
-    public DataElem(String name, String type, String category, String value, String label) {
+    public DataElem(String name, String type, String category, Object value, String label) {
         this.name = name;
         this.type = type;
         this.category = category;
         this.value = value;
         this.label = label;
+
     }
 
     public String getLabel() {
@@ -59,12 +61,20 @@ public class DataElem {
         this.category = category;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
+    }
+
+    public Object getExtra() {
+        return extra;
+    }
+
+    public void setExtra(Object extra) {
+        this.extra = extra;
     }
 }
 

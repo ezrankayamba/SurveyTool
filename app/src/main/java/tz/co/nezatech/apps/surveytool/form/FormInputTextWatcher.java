@@ -1,6 +1,6 @@
 package tz.co.nezatech.apps.surveytool.form;
 
-import android.app.Activity;
+import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -11,14 +11,14 @@ import android.widget.EditText;
  * Created by nkayamba on 2/15/18.
  */
 
-abstract class FormInputTextWatcher implements TextWatcher, View.OnFocusChangeListener {
+public abstract class FormInputTextWatcher implements TextWatcher, View.OnFocusChangeListener {
     private static final String TAG = FormInputTextWatcher.class.getName();
     EditText editText;
-    Activity activity;
+    Context activity;
     boolean textChanged = false;
     String newText = null;
 
-    public FormInputTextWatcher(final Activity activity, EditText editText) {
+    public FormInputTextWatcher(final Context activity, EditText editText) {
         this.editText = editText;
         this.activity = activity;
 

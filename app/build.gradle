@@ -2,10 +2,10 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "26.0.1"
+    //buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "tz.co.nezatech.apps.surveytool"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -22,10 +22,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    //compile files('libs/ormlite-core-5.1.jar')
-    compile files('libs/nezahttp-1.0.0.jar')
+    //compile fileTree(include: ['*.jar'], dir: 'libs')
     compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    compile group: 'com.j256.ormlite', name: 'ormlite-android', version: '5.1'
     compile 'com.android.support:support-core-utils:25.4.0'
     compile 'com.android.support:appcompat-v7:25.+'
     compile 'com.android.support:design:25.+'
@@ -34,4 +33,5 @@ dependencies {
     compile 'com.android.support:support-vector-drawable:25.+'
     compile 'com.android.support:recyclerview-v7:25.+'
     compile 'com.google.code.gson:gson:2.8.2'
+
 }

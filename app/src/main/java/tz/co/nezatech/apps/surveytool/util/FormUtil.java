@@ -17,7 +17,8 @@ public class FormUtil {
     public static final String FORM_INSTANCE_DATA = "formInstance";
 
     public static final String formInstanceName(Form form, Date recordDate, String display) {
-        return String.format("%s: %s", form.getName(), display);
+        //return String.format("%s: %s", form.getName(), display);
+        return String.format("%s", display);
     }
 
     public static final Date fromStr(String str) throws ParseException {

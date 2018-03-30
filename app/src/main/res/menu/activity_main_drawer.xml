@@ -32,5 +32,4 @@
                 android:title="@string/nav_gps_check" />
         </menu>
     </item>
-
 </menu>

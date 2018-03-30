@@ -27,6 +27,7 @@ public class FormInstance implements Serializable, Listable {
     Form form;
     @DatabaseField(columnName = "record_date")
     Date recordDate;
+    String lastUpdate;
     @DatabaseField
     String json;
     @DatabaseField(index = true, unique = true)
@@ -100,6 +101,14 @@ public class FormInstance implements Serializable, Listable {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(String lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
     @Override

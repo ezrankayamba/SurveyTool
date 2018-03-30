@@ -5,9 +5,10 @@ package tz.co.nezatech.apps.surveytool.util;
  */
 
 public class Input {
-    private String category, name, type, value, label;
+    private String category, name, type, label;
+    private Object value;
 
-    public Input(String category, String name, String type, String value, String label) {
+    public Input(String category, String name, String type, Object value, String label) {
         this.category = category;
         this.name = name;
         this.type = type;
@@ -47,11 +48,11 @@ public class Input {
         this.type = type;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }

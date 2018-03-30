@@ -12,8 +12,10 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 
 import tz.co.nezatech.apps.surveytool.R;
+import tz.co.nezatech.apps.surveytool.db.model.DataType;
 import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
+import tz.co.nezatech.apps.surveytool.db.model.Setup;
 
 /**
  * Database helper which creates and upgrades the database and provides the DAOs for the app.
@@ -21,10 +23,13 @@ import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "survey.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 14;
 
     private Dao<Form, Integer> formDao;
     private Dao<FormInstance, Integer> formInstanceDao;
+    private Dao<Setup, String> setupDao;
+    private Dao<DataType, String> dataTypeDao;
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
@@ -35,6 +40,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.createTable(connectionSource, Form.class);
             TableUtils.createTable(connectionSource, FormInstance.class);
+            TableUtils.createTable(connectionSource, Setup.class);
+            TableUtils.createTable(connectionSource, DataType.class);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Unable to create datbases", e);
         }
@@ -45,6 +52,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         try {
             TableUtils.dropTable(connectionSource, FormInstance.class, true);
             TableUtils.dropTable(connectionSource, Form.class, true);
+            TableUtils.dropTable(connectionSource, Setup.class, true);
+            TableUtils.dropTable(connectionSource, DataType.class, true);
             onCreate(sqliteDatabase, connectionSource);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Unable to upgrade database from version " + oldVer + " to new "
@@ -57,6 +66,20 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             formDao = getDao(Form.class);
         }
         return formDao;
+    }
+
+    public Dao<Setup, String> getSetupDao() throws SQLException {
+        if (setupDao == null) {
+            setupDao = getDao(Setup.class);
+        }
+        return setupDao;
+    }
+
+    public Dao<DataType, String> getDataTypeDao() throws SQLException {
+        if (dataTypeDao == null) {
+            dataTypeDao = getDao(DataType.class);
+        }
+        return dataTypeDao;
     }
 
     public Dao<FormInstance, Integer> getFormInstanceDao() throws SQLException {

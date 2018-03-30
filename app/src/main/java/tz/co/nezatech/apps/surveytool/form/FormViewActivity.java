@@ -10,16 +10,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.TypeRef;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -28,6 +28,9 @@ import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
 import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
+import tz.co.nezatech.apps.surveytool.form.util.SurveyForm;
+import tz.co.nezatech.apps.surveytool.form.util.SurveyFormLocCapture;
+import tz.co.nezatech.apps.surveytool.form.util.SurveyFormLocCaptureImpl;
 import tz.co.nezatech.apps.surveytool.util.FormUtil;
 
 public class FormViewActivity extends AppCompatActivity {
@@ -35,6 +38,7 @@ public class FormViewActivity extends AppCompatActivity {
     LayoutInflater layoutInflater = null;
     FormInstance formInstance = null;
     Form form = null;
+    SurveyFormLocCapture surveyForm;
     private DatabaseHelper databaseHelper = null;
 
     @Override
@@ -63,7 +67,11 @@ public class FormViewActivity extends AppCompatActivity {
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        initForm();
+        surveyForm = new SurveyFormLocCaptureImpl(this, getHelper(), form, formInstance, SurveyForm.FormMode.VIEW);
+
+        initForm(surveyForm);
+
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     @Override
@@ -84,7 +92,7 @@ public class FormViewActivity extends AppCompatActivity {
         finish();
     }
 
-    private void initForm() {
+    private void initForm(SurveyFormLocCapture surveyForm) {
         try {
             LinearLayout viewVontrols = (LinearLayout) findViewById(R.id.viewVontrols);
             final LinearLayout mainLayout = (LinearLayout) findViewById(R.id.form_edit_layout);
@@ -113,23 +121,24 @@ public class FormViewActivity extends AppCompatActivity {
                 }
             });
 
-            JSONObject ui = new JSONObject(formInstance.getJson());
+            JSONObject ui = new JSONObject(form.getJson());
             JSONArray groups = (JSONArray) ui.get("groups");
             final LinearLayout gropusLayout = (LinearLayout) layoutInflater.inflate(R.layout.form_container, null);
             gropusLayout.setOrientation(LinearLayout.VERTICAL);
             mainLayout.addView(gropusLayout);
 
-            //((TextView) gropusLayout.findViewById(R.id.form_header)).setText(form.getName());
-
             for (int g = 0; g < groups.length(); g++) {
                 final JSONObject group = (JSONObject) groups.get(g);
 
-                String type = jsonStr(group, "type", "Text");
-                String grpName = jsonStr(group, "name", null);
+                String type = surveyForm.jsonStr(group, "type", "Text");
+                String grpName = surveyForm.jsonStr(group, "name", null);
                 Log.d(TAG, "Type: " + type);
 
                 final TextView grpLabel = (TextView) (layoutInflater.inflate(R.layout.form_group_label, null));
-                List<String> label = JsonPath.read(form.getJson(), "$.groups[?(@.name == '" + grpName + "')].label");
+                TypeRef<List<String>> typeRef = new TypeRef<List<String>>() {
+                };
+                String path = "$.groups[?(@.name == '" + grpName + "')].label";
+                List<String> label = JsonPath.parse(form.getJson()).read(path, typeRef);
                 String lbl = label.get(0);
                 grpLabel.setText(lbl);
                 gropusLayout.addView(grpLabel);
@@ -137,7 +146,7 @@ public class FormViewActivity extends AppCompatActivity {
                 switch (type) {
                     default:
                         Log.d(TAG, "doTextInput");
-                        doTextInput(layoutInflater, gropusLayout, group);
+                        surveyForm.doGenericInputGroup(layoutInflater, gropusLayout, group);
                         break;
                 }
 
@@ -146,52 +155,6 @@ public class FormViewActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void doTextInput(LayoutInflater inflater, LinearLayout gropusLayout, JSONObject group) throws JSONException {
-        JSONArray inputs = (JSONArray) group.get("inputs");
-
-        LinearLayout formL = (LinearLayout) inflater.inflate(R.layout.form_layout, null);
-        //setFormGrpTag(group, form);
-
-
-        formL.setOrientation(LinearLayout.VERTICAL);
-        gropusLayout.addView(formL);
-
-        for (int i = 0; i < inputs.length(); i++) {
-            JSONObject input = (JSONObject) inputs.get(i);
-            String dataType = jsonStr(input, "type", null);
-
-            String name = jsonStr(input, "name", null);
-
-            TextView label = (TextView) inflater.inflate(R.layout.form_label, null);
-            List<String> l = JsonPath.read(form.getJson(), "$.groups[?(@.name == '" + jsonStr(group, "name", null) + "')].inputs[?(@.name == '" + name + "')].label");
-
-            String lbl = l.get(0);
-            label.setText(lbl);
-            formL.addView(label);
-
-            EditText text = (EditText) inflater.inflate(R.layout.form_input_text, null);
-            List<String> v = JsonPath.read(formInstance.getJson(), "$.groups[?(@.name == '" + jsonStr(group, "name", null) + "')].inputs[?(@.name == '" + name + "')].value");
-            text.setText(v.get(0));
-            text.setEnabled(false);
-            text.setTag(name);
-            //setTextDataType(text, dataType);
-            formL.addView(text);
-
-            //setInputTag(input, text);
-
-            LinearLayout vspace1 = (LinearLayout) inflater.inflate(R.layout.form_input_vseparator, null);
-            formL.addView(vspace1);
-        }
-    }
-
-    public String jsonStr(JSONObject o, String key, String defaultValue) {
-        try {
-            return o.getString(key);
-        } catch (Exception e) {
-        }
-        return defaultValue;
     }
 
     private DatabaseHelper getHelper() {

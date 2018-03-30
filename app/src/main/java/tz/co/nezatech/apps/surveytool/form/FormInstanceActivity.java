@@ -7,11 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -30,6 +31,8 @@ import tz.co.nezatech.apps.surveytool.util.ListAdapter;
 public class FormInstanceActivity extends AppCompatActivity {
     final String TAG = FormInstanceActivity.class.getName();
     Form form;
+    ListView mListView = null;
+    Filter filter = null;
     private DatabaseHelper databaseHelper = null;
 
     @Override
@@ -40,7 +43,7 @@ public class FormInstanceActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         form = (Form) intent.getSerializableExtra(FormUtil.FORM_REPOS_DATA);
-        toolbar.setTitle(form.getDescription());
+        toolbar.setTitle(form.getName());
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -73,7 +76,7 @@ public class FormInstanceActivity extends AppCompatActivity {
             for (FormInstance fi : formInstances) {
                 Log.d(TAG, String.format("Name: %s, Form: %s", fi.getName(), fi.getForm()));
             }
-            final ListView mListView = (ListView) findViewById(R.id.form_instance_list);
+            mListView = (ListView) findViewById(R.id.form_instance_list);
             ListAdapter<FormInstance> adapter = new ListAdapter<FormInstance>(FormInstanceActivity.this, formInstances) {
                 @Override
                 protected void handleRowClick(int position, FormInstance fi) {
@@ -107,32 +110,7 @@ public class FormInstanceActivity extends AppCompatActivity {
             mListView.setAdapter(adapter);
             mListView.setTextFilterEnabled(false);
 
-            final Filter filter = adapter.getFilter();
-
-            SearchView mSearchView = (SearchView) findViewById(R.id.searchText);
-            mSearchView.setIconifiedByDefault(false);
-            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    Log.d(TAG, "Query submitted: " + query);
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    Log.d(TAG, "Query text changed: " + newText);
-                    if (TextUtils.isEmpty(newText)) {
-                        mListView.clearTextFilter();
-                        filter.filter("");
-                    } else {
-                        mListView.setFilterText(newText);
-                        filter.filter(newText);
-                    }
-                    return true;
-                }
-            });
-            mSearchView.setQueryHint(getString(R.string.list_filter_hint));
-            mSearchView.clearFocus();
+            filter = adapter.getFilter();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,6 +131,35 @@ public class FormInstanceActivity extends AppCompatActivity {
             OpenHelperManager.releaseHelper();
             databaseHelper = null;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.form_instance, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search_instances);
+        android.support.v7.widget.SearchView mSearchView = (android.support.v7.widget.SearchView) searchItem.getActionView();
+        mSearchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, "Query submitted: " + query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(TAG, "Query text changed: " + newText);
+                if (TextUtils.isEmpty(newText)) {
+                    mListView.clearTextFilter();
+                    filter.filter("");
+                } else {
+                    mListView.setFilterText(newText);
+                    filter.filter(newText);
+                }
+                return true;
+            }
+        });
+        mSearchView.setQueryHint(getString(R.string.list_filter_hint));
+        return true;
     }
 
 }
