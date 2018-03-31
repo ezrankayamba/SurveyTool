@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,32 +52,27 @@ import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
 import tz.co.nezatech.apps.surveytool.db.model.Setup;
 import tz.co.nezatech.apps.surveytool.form.DataElem;
-import tz.co.nezatech.apps.surveytool.form.FormInputTextWatcher;
 import tz.co.nezatech.apps.surveytool.util.Group;
 import tz.co.nezatech.apps.surveytool.util.Input;
 import tz.co.nezatech.apps.surveytool.util.Instance;
 
-/**
- * Created by nkayamba on 3/10/18.
- */
-
-public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
+class SurveyFormImpl extends FormViewImpl implements SurveyForm {
     private static final String TAG = SurveyFormImpl.class.getName();
-    DatabaseHelper databaseHelper;
-    Context context;
-    Form form;
-    FormInstance formInstance;
-    FormMode formMode = FormMode.NEW;
+    private DatabaseHelper databaseHelper;
+    private Context context;
+    private Form form;
+    private FormInstance formInstance;
+    private FormMode formMode = FormMode.NEW;
 
-    public SurveyFormImpl(Context context, DatabaseHelper databaseHelper, Form form) {
+    SurveyFormImpl(Context context, DatabaseHelper databaseHelper, Form form) {
         this(context, databaseHelper, form, null);
     }
 
-    public SurveyFormImpl(Context context, DatabaseHelper databaseHelper, Form form, FormInstance formInstance) {
+    SurveyFormImpl(Context context, DatabaseHelper databaseHelper, Form form, FormInstance formInstance) {
         this(context, databaseHelper, form, formInstance, FormMode.VIEW);
     }
 
-    public SurveyFormImpl(Context context, DatabaseHelper databaseHelper, Form form, FormInstance formInstance, FormMode formMode) {
+    SurveyFormImpl(Context context, DatabaseHelper databaseHelper, Form form, FormInstance formInstance, FormMode formMode) {
         super(form, context);
         this.databaseHelper = databaseHelper;
         this.context = context;
@@ -106,7 +103,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
     }
 
 
-    public boolean checkFormInputsRegex(ViewGroup root) {
+    private boolean checkFormInputsRegex(ViewGroup root) {
         final int childCount = root.getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = root.getChildAt(i);
@@ -138,12 +135,10 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
             if (checkFormInputsRegex(root)) {
                 ArrayList<View> viewsWithTag = getViewsWithTag(root);
 
-                List<DataElem> list = new LinkedList<>();
                 Instance instance = new Instance(form.getFormId());
                 List<Group> groups = new LinkedList<>();
                 List<Input> inputs = null;
                 Group group = null;
-                ArrayList<String> displayList = new ArrayList<>();
                 String tmpl = form.getDisplay();
                 for (View v : viewsWithTag) {
                     DataElem dataElem = dataFromView(v);
@@ -157,7 +152,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                         }
                         group = new Group(dataElem.getCategory(), dataElem.getName(), dataElem.getType(), dataElem.getLabel());
                         inputs = new LinkedList<>();
-                    } else if (inputTag != null) {
+                    } else if (inputs != null) {
                         inputs.add(new Input(inputTag.name(), dataElem.getName(), dataElem.getType(), dataElem.getValue(), dataElem.getLabel()));
                         Log.d(TAG, String.format("Tmpl: %s, Name: %s", tmpl, dataElem.getName()));
                         if (dataElem.getExtra() != null && tmpl.contains(dataElem.getName())) {
@@ -165,9 +160,11 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                         } else if (dataElem.getValue() != null && tmpl.contains(dataElem.getName())) {
                             tmpl = tmpl.replaceAll(dataElem.getName(), dataElem.getValue().toString());
                         }
+                    } else {
+                        Log.d(TAG, String.format("Unhandled input %s", dataElem));
                     }
                 }
-                if (group != null && inputs != null) {//first grp, ignore
+                if (group != null) {//first grp, ignore
                     group.setInputs(inputs);
                     groups.add(group);
                 }
@@ -209,8 +206,9 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
     @Override
     public String jsonStr(JSONObject o, String key, String defaultValue) {
         try {
-            return o.getString(key);
+            return o.optString(key, defaultValue);
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return defaultValue;
     }
@@ -254,7 +252,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
     public void doGenericInputGroup(LayoutInflater inflater, LinearLayout gropusLayout, JSONObject group) throws JSONException {
         JSONArray inputs = (JSONArray) group.get("inputs");
 
-        LinearLayout form = (LinearLayout) inflater.inflate(R.layout.form_layout, null);
+        LinearLayout form = (LinearLayout) inflater.inflate(R.layout.form_layout, gropusLayout, false);
         setFormGrpTag(group, form);
 
         form.setOrientation(LinearLayout.VERTICAL);
@@ -267,13 +265,13 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                 String name = jsonStr(input, "name", null);
                 Log.d(TAG, String.format("Name: %s, Type: %s", name, dataType));
 
-                TextView label = (TextView) inflater.inflate(R.layout.form_label, null);
+                TextView label = (TextView) inflater.inflate(R.layout.form_label, form, false);
                 label.setText(input.getString("label"));
                 form.addView(label);
 
                 String setupsRegex = "^Setup\\.(\\w+)$";
-                String otherSelectRegex = "^Select\\[([ a-zA-Z0-9,;\\(\\)/]+)]$";
-                String otherMultiSelectRegex = "^MultiSelect\\[([ a-zA-Z0-9,;\\(\\)/]+)]$";
+                String otherSelectRegex = "^Select\\[([ a-zA-Z0-9,;()/]+)]$";
+                String otherMultiSelectRegex = "^MultiSelect\\[([ a-zA-Z0-9,;()/]+)]$";
 
                 Pattern pattern = Pattern.compile(setupsRegex);
                 Matcher matcher = pattern.matcher(dataType == null ? "" : dataType);
@@ -294,7 +292,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                     inputText(inflater, group, form, input, dataType, name);
                 }
 
-                LinearLayout vspace1 = (LinearLayout) inflater.inflate(R.layout.form_input_vseparator, null);
+                LinearLayout vspace1 = (LinearLayout) inflater.inflate(R.layout.form_input_vseparator, form, false);
                 form.addView(vspace1);
             } catch (Exception e) {
                 Log.d(TAG, e.getMessage());
@@ -305,7 +303,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
 
     private void inputText(LayoutInflater inflater, JSONObject group, LinearLayout form, JSONObject input, String dataType, String name) {
         Log.d(TAG, "doTextInput");
-        final EditText text = (EditText) inflater.inflate(R.layout.form_input_text, null);
+        final EditText text = (EditText) inflater.inflate(R.layout.form_input_text, form, false);
         //String name = jsonStr(input, "name", null);
         text.setTag(name);
         if (formInstance != null) {
@@ -322,13 +320,6 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
             text.setSingleLine(false);
             text.setImeOptions(EditorInfo.IME_FLAG_NO_ENTER_ACTION);
         }
-        FormInputTextWatcher watcher = new FormInputTextWatcher(context, text) {
-
-            @Override
-            public void validateInput(EditText inputField) {
-                regexCheck(inputField, false);
-            }
-        };
         form.addView(text);
         setInputTag(input, text);
     }
@@ -344,19 +335,23 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
             extras = Arrays.asList(parts[1].split(","));
         }
         List<DataType> values = new LinkedList<>();
-        List<CheckBoxInput> checkBoxInputs = null;
+        List<ExtraSelectInput> checkBoxInputs = null;
         try {
-            List<DataType> dataTypes = databaseHelper.getDataTypeDao().queryForEq("type", setupType);
+            //List<DataType> dataTypes = databaseHelper.getDataTypeDao().queryForEq("type", setupType);
+            QueryBuilder<DataType, String> qb = databaseHelper.getDataTypeDao().queryBuilder();
+            qb.where().eq("type", setupType);
+            qb.orderBy("position", true);
+            List<DataType> dataTypes = qb.query();
+
             if (formInstance != null) {
                 String path = "$.groups[?(@.name == '" + jsonStr(group, "name", null) + "')].inputs[?(@.name == '" + name + "')].value";
-                TypeRef<List<List<CheckBoxInput>>> typeRef = new TypeRef<List<List<CheckBoxInput>>>() {
+                TypeRef<List<List<ExtraSelectInput>>> typeRef = new TypeRef<List<List<ExtraSelectInput>>>() {
                 };
-                List<List<CheckBoxInput>> v = JsonPath.parse(formInstance.getJson()).read(path, typeRef);
-                Gson g = new Gson();
+                List<List<ExtraSelectInput>> v = JsonPath.parse(formInstance.getJson()).read(path, typeRef);
                 try {
                     Log.d(TAG, String.format("inputMultiSelect=> %s = %s", name, v));
                     checkBoxInputs = v.get(0);
-                    for (CheckBoxInput cbIn : checkBoxInputs) {
+                    for (ExtraSelectInput cbIn : checkBoxInputs) {
                         values.add(databaseHelper.getDataTypeDao().queryForId(cbIn.getName()));
                     }
                 } catch (Exception e) {
@@ -367,19 +362,20 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
             Log.d(TAG, String.format("inputMultiSelect=> %s = %s", name, values));
 
 
-            LinearLayout checkLayout = (LinearLayout) inflater.inflate(R.layout.form_input_layout_checkgroup, null);
+            LinearLayout checkLayout = (LinearLayout) inflater.inflate(R.layout.form_input_layout_checkgroup, form, false);
             LinearLayout formCheckGroup = (LinearLayout) checkLayout.findViewById(R.id.formCheckGroup);
             formCheckGroup.removeAllViews();
 
-            final LinearLayout layoutLabels = (LinearLayout) inflater.inflate(R.layout.form_input_checkbox_narrate_labels, null);
+            final LinearLayout layoutLabels = (LinearLayout) inflater.inflate(R.layout.form_input_checkbox_narrate_labels, form, false);
             final LinearLayout extraLayoutLabels = (LinearLayout) layoutLabels.findViewById(R.id.checkBox1ExtraLabels);
             extraLayoutLabels.removeAllViews();
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-            if (extras != null) {
+            final boolean thereAreExtras = extras != null && extras.size() > 0;
+            if (thereAreExtras) {
                 extraLayoutLabels.setWeightSum(extras.size());
 
                 for (String extra : extras) {
-                    EditText text = (EditText) inflater.inflate(R.layout.form_input_checkextra_text, null);
+                    EditText text = (EditText) inflater.inflate(R.layout.form_input_checkextra_text, form, false);
                     //EditText text = new EditText(context);
                     text.setHint(extra);
                     text.setLayoutParams(params);
@@ -395,27 +391,31 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                 final LinearLayout layout = (LinearLayout) inflater.inflate(otherSpecify ? R.layout.form_input_checkbox_narrate_otherspecify : R.layout.form_input_checkbox_narrate, null);
                 final LinearLayout extraLayout = (LinearLayout) layout.findViewById(R.id.checkBox1Extra);
                 extraLayout.removeAllViews();
-                CheckBoxInput boxInput = null;
-                if (extras != null) {
+                ExtraSelectInput boxInput = null;
+
+
+                if (thereAreExtras) {
                     extraLayout.setWeightSum(extras.size());
-                    int i = -1;
+
 
                     if (formInstance != null && checkBoxInputs != null) {
-                        for (CheckBoxInput input1 : checkBoxInputs) {
+                        for (ExtraSelectInput input1 : checkBoxInputs) {
                             if (input1.getName().equals(dt.getName())) {
                                 boxInput = input1;
+                                Log.d(TAG, String.format(Locale.ENGLISH, "inputMultiSelect=> %s, %s", name, boxInput));
                                 break;
                             }
                         }
                     }
 
+                    int i = -1;
                     for (String extra : extras) {
-                        EditText text = (EditText) inflater.inflate(R.layout.form_input_checkextra_text, null);
+                        EditText text = (EditText) inflater.inflate(R.layout.form_input_checkextra_text, form, false);
                         //EditText text = new EditText(context);
                         text.setHint(extra);
                         text.setLayoutParams(params);
-                        if (boxInput != null) {
-                            i++;
+                        i++;
+                        if (boxInput != null && boxInput.getExtras().size() > i) {
                             text.setText(boxInput.getExtras().get(i));
                         }
                         text.setEnabled(!(getMode() == FormMode.VIEW));
@@ -434,7 +434,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                     cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            extraLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                            extraLayout.setVisibility(isChecked && thereAreExtras ? View.VISIBLE : View.GONE);
                             layout.requestFocus();
                             otherSp.setVisibility(isChecked ? View.VISIBLE : View.GONE);
                         }
@@ -450,7 +450,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                     cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                         @Override
                         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                            extraLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                            extraLayout.setVisibility(isChecked && thereAreExtras ? View.VISIBLE : View.GONE);
                             layout.requestFocus();
                         }
                     });
@@ -480,32 +480,33 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
         Log.d(TAG, "Single select: " + dataType);
         String setupType = matcherOSel.group(1);
         try {
-            List<DataType> dataTypes = databaseHelper.getDataTypeDao().queryForEq("type", setupType);
+            //List<DataType> dataTypes = databaseHelper.getDataTypeDao().queryForEq("type", setupType);
+            QueryBuilder<DataType, String> qb = databaseHelper.getDataTypeDao().queryBuilder();
+            qb.where().eq("type", setupType);
+            qb.orderBy("position", true);
+            List<DataType> dataTypes = qb.query();
             DataType value = null;
-            RadioGroupInput radioGroupInput = null;
+            SelectInput radioGroupInput = null;
             if (formInstance != null) {
                 try {
-                    TypeRef<List<RadioGroupInput>> typeRef = new TypeRef<List<RadioGroupInput>>() {
+                    TypeRef<List<SelectInput>> typeRef = new TypeRef<List<SelectInput>>() {
                     };
                     String path = "$.groups[?(@.name == '" + jsonStr(group, "name", null) + "')].inputs[?(@.name == '" + name + "')].value";
-                    List<RadioGroupInput> v = JsonPath.parse(formInstance.getJson()).read(path, typeRef);
+                    List<SelectInput> v = JsonPath.parse(formInstance.getJson()).read(path, typeRef);
 
                     try {
 
                         radioGroupInput = v.get(0);
                         value = databaseHelper.getDataTypeDao().queryForId(radioGroupInput.getName());
                     } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                if (value != null) {
-                    //int spinnerPosition = myAdapter.getPosition(value);
-                    //radioLayout.setSelection(spinnerPosition);
-                }
             }
 
-            final LinearLayout radioLayout = (LinearLayout) inflater.inflate(R.layout.form_input_layout_radiogroup, null);
+            final LinearLayout radioLayout = (LinearLayout) inflater.inflate(R.layout.form_input_layout_radiogroup, form, false);
             RadioGroup radioGroup = (RadioGroup) radioLayout.findViewById(R.id.formRadioGroup);
             radioGroup.removeAllViews();
             int i = -1;
@@ -538,7 +539,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
 
                     EditText otherSp = (EditText) l.findViewById(R.id.checkOtherText);
                     otherSp.setEnabled(!(getMode() == FormMode.VIEW));
-                    if (found && radioGroupInput != null) {
+                    if (found) {
                         otherSp.setText(radioGroupInput.getNameOther());
                         l.setVisibility(View.VISIBLE);
                     } else {
@@ -577,19 +578,15 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
         try {
             List<Setup> setups = databaseHelper.getSetupDao().queryForEq("type", setupType);
 
-            LinearLayout autoTVLayout = (LinearLayout) inflater.inflate(R.layout.form_input_autocomplete, null);
+            LinearLayout autoTVLayout = (LinearLayout) inflater.inflate(R.layout.form_input_autocomplete, form, false);
             final AutoCompleteTextView spinner = (AutoCompleteTextView) autoTVLayout.findViewById(R.id.autoTextViewSpinner);
             final EditText autoTextViewUuid = (EditText) autoTVLayout.findViewById(R.id.autoTextViewUuid);
             final EditText autoTextViewText = (EditText) autoTVLayout.findViewById(R.id.autoTextViewText);
             autoTextViewUuid.setVisibility(View.GONE);
             autoTextViewText.setVisibility(View.GONE);
-            ArrayAdapter<Setup> myAdapter = new ArrayAdapter<Setup>(context, android.R.layout.select_dialog_singlechoice, setups);
+            ArrayAdapter<Setup> myAdapter = new ArrayAdapter<>(context, android.R.layout.select_dialog_singlechoice, setups);
             spinner.setThreshold(1);
             spinner.setAdapter(myAdapter);
-            if (getMode() != FormMode.VIEW) {
-
-
-            }
 
             if (getMode() == FormMode.VIEW) {
                 spinner.dismissDropDown();
@@ -598,9 +595,6 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                 spinner.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                     @Override
                     public void onFocusChange(View view, boolean hasFocus) {
-                        if (hasFocus) {
-                            //spinner.showDropDown();
-                        }
                     }
                 });
                 spinner.setOnClickListener(new View.OnClickListener() {
@@ -643,7 +637,7 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                 if (setup != null) {
                     int spinnerPosition = myAdapter.getPosition(setup);
                     Log.d(TAG, "Position: " + spinnerPosition);
-                    spinner.setSelection(spinnerPosition);
+                    //spinner.setSelection(spinnerPosition);
                     autoTextViewUuid.setText(setup.getUuid());
                     autoTextViewText.setText(setup.getName());
                     spinner.setText(setup.getName());
@@ -677,7 +671,6 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
             String regex = null;
             String regexMessage = null;
             try {
-                Log.d(TAG, String.format("EditText-Tag: %s, Regex: %s", tag, regex));
                 String name = tag.toString().split(":")[1];
                 TypeRef<List<String>> typeRef = new TypeRef<List<String>>() {
                 };
@@ -700,9 +693,6 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
 
             if (regex != null && !regex.isEmpty()) {
                 String value = txt.getText().toString();
-                if (value == null) {
-                    value = "";
-                }
                 Pattern p = Pattern.compile(regex, Pattern.MULTILINE);
                 if (p.matcher(value).find()) {
                     Log.d(TAG, "Validation-OK");
@@ -728,4 +718,23 @@ public class SurveyFormImpl extends FormViewImpl implements SurveyForm {
         return false;
     }
 
+    public Form getForm() {
+        return form;
+    }
+
+    public void setForm(Form form) {
+        this.form = form;
+    }
+
+    FormInstance getFormInstance() {
+        return formInstance;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 }

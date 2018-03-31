@@ -2,15 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_search_instances"
+        android:id="@+id/action_search_summary"
         android:icon="@drawable/ic_action_search_instances"
         android:title="@string/txt_search_instances"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
-    <item
-        android:id="@+id/action_local_form_sync"
-        android:icon="@drawable/ic_action_forms_sync"
-        android:title="@string/txt_sync_local_forms"
-        app:showAsAction="always" />
 </menu>
 

@@ -1,7 +1,9 @@
 package tz.co.nezatech.apps.surveytool.db;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
@@ -23,16 +25,18 @@ import tz.co.nezatech.apps.surveytool.db.model.Setup;
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "survey.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 20;
 
     private Dao<Form, Integer> formDao;
     private Dao<FormInstance, Integer> formInstanceDao;
     private Dao<Setup, String> setupDao;
     private Dao<DataType, String> dataTypeDao;
+    private Context ctx;
 
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
+        ctx = context;
     }
 
     @Override
@@ -54,6 +58,16 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             TableUtils.dropTable(connectionSource, Form.class, true);
             TableUtils.dropTable(connectionSource, Setup.class, true);
             TableUtils.dropTable(connectionSource, DataType.class, true);
+
+            //resync
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+            SharedPreferences.Editor edit = sharedPrefs.edit();
+            String lastUpdate = "2018-01-01 00:00:00";
+            edit.putString("form_datatypes_last_update", lastUpdate);
+            edit.putString("form_setups_last_update", lastUpdate);
+            edit.putString("form_survey_forms_last_update", lastUpdate);
+            edit.commit();
+
             onCreate(sqliteDatabase, connectionSource);
         } catch (SQLException e) {
             Log.e(DatabaseHelper.class.getName(), "Unable to upgrade database from version " + oldVer + " to new "

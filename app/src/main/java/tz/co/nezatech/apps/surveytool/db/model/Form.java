@@ -4,6 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * Created by nkayamba on 2/1/18.
@@ -80,5 +81,17 @@ public class Form implements Serializable {
 
     public void setDisplay(String display) {
         this.display = display;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.ENGLISH, "Name: %s, PK(Id): %d, FormId: %d", getName(), getId(), getFormId());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        Form tmp = (Form) obj;
+        return tmp.getId() == this.getId();
     }
 }

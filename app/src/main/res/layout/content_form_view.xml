@@ -34,22 +34,21 @@
                     android:background="@color/controlsColor"
                     android:orientation="horizontal">
 
-                    <ImageButton
+                    <Button
                         android:id="@+id/btnDelete"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/secondaryLightColor"
-                        android:tint="@android:color/holo_red_dark"
-                        app:srcCompat="@android:drawable/ic_menu_delete" />
+                        android:background="@color/controlsColor"
+                        android:drawableLeft="@android:drawable/ic_menu_delete"
+                        android:drawablePadding="8dp"
+                        android:text="Delete"
+                        android:textAlignment="viewStart"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/holo_red_light"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:tint="@android:color/holo_red_dark" />
 
-                    <TextView
-                        android:id="@+id/textView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="fill_vertical"
-                        android:paddingLeft="4dp"
-                        android:text="Delete" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -60,23 +59,21 @@
                     android:background="@color/controlsColor"
                     android:orientation="horizontal">
 
-                    <ImageButton
+                    <Button
                         android:id="@+id/btnEdit"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="1dp"
-                        android:background="@color/secondaryLightColor"
-                        android:tint="@android:color/white"
-                        app:srcCompat="@android:drawable/ic_menu_edit" />
-
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:gravity="fill_vertical"
-                        android:paddingLeft="4dp"
-                        android:text="Edit" />
+                        android:background="@color/controlsColor"
+                        android:drawableLeft="@android:drawable/ic_menu_edit"
+                        android:drawablePadding="8dp"
+                        android:text="Edit"
+                        android:textAlignment="viewStart"
+                        android:textAllCaps="false"
+                        android:textColor="@color/primaryLightColor"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:tint="@android:color/white" />
                 </LinearLayout>
 
             </LinearLayout>

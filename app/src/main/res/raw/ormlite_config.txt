@@ -1,5 +1,5 @@
 #
-# generated on 2018/03/13 08:24:28
+# generated on 2018/03/31 11:07:36
 #
 # --table-start--
 dataClass=tz.co.nezatech.apps.surveytool.db.model.DataType
@@ -14,6 +14,9 @@ fieldName=type
 # --field-end--
 # --field-start--
 fieldName=lastUpdate
+# --field-end--
+# --field-start--
+fieldName=position
 # --field-end--
 # --table-fields-end--
 # --table-end--

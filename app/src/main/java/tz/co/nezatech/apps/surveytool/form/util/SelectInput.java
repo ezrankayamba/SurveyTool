@@ -1,27 +1,22 @@
 package tz.co.nezatech.apps.surveytool.form.util;
 
-import java.util.List;
-
 /**
  * Created by nkayamba on 3/30/18.
  */
 
-public class CheckBoxInput {
+public class SelectInput {
     private String name;
     private String nameOther;
-    private List<String> extras;
 
-    public CheckBoxInput() {
+    public SelectInput() {
     }
 
-    public CheckBoxInput(String name, List<String> extras) {
+    public SelectInput(String name) {
         this.name = name;
-        this.extras = extras;
     }
 
-    public CheckBoxInput(String name, List<String> extras, String nameOther) {
+    public SelectInput(String name, String nameOther) {
         this.name = name;
-        this.extras = extras;
         this.nameOther = nameOther;
     }
 
@@ -31,14 +26,6 @@ public class CheckBoxInput {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<String> getExtras() {
-        return extras;
-    }
-
-    public void setExtras(List<String> extras) {
-        this.extras = extras;
     }
 
     public String getNameOther() {

@@ -10,10 +10,6 @@ import org.json.JSONObject;
 
 import tz.co.nezatech.apps.surveytool.location.LocationService;
 
-/**
- * Created by nkayamba on 3/10/18.
- */
-
 public interface SurveyFormLocCapture extends SurveyForm, LocationService.LocationServiceListener {
     void doGPSLocationCapture(LayoutInflater layoutInflater, LinearLayout gropusLayout, JSONObject group) throws JSONException;
 

@@ -9,10 +9,6 @@ import android.widget.LinearLayout;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by nkayamba on 3/10/18.
- */
-
 public interface SurveyForm extends FormView {
     String jsonStr(JSONObject o, String key, String defaultValue);
 

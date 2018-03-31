@@ -130,4 +130,5 @@
     <string name="constTextOthersSpecify">OthersSpecify</string>
     <string name="formCheckBoxOtherSpecifyNewLabel">Specify others</string>
     <string name="formRadioGroupOtherSpecifyNewLabel">Specify others</string>
+    <string name="txt_sync_local_forms">Sync local forms</string>
 </resources>

@@ -47,6 +47,12 @@
             android:inputType="textMultiLine"
             android:padding="8dp"
             android:textSize="14sp" />
+
     </LinearLayout>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

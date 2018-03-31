@@ -37,12 +37,9 @@ import tz.co.nezatech.apps.surveytool.db.model.Setup;
 import tz.co.nezatech.apps.surveytool.form.SetupQuery;
 import tz.co.nezatech.apps.surveytool.util.HttpUtil;
 
-/**
- * Created by nkayamba on 3/25/18.
- */
-
 public class SyncHttpUtil {
     final String TAG = this.getClass().getName();
+    boolean cleanFirst;
     private Context ctx;
 
     public SyncHttpUtil(Context ctx) {
@@ -190,6 +187,9 @@ public class SyncHttpUtil {
             String lu = sharedPrefs.getString("form_datatypes_last_update", "2018-01-01 00:00:00");
             //lu="2018-01-01 00:00:00";//hardcoded
             q.setLastUpdate(lu);
+            if (isCleanFirst()) {
+                q.setLastUpdate("2018-01-01 00:00:00");
+            }
 
             Gson g = new Gson();
             String json = g.toJson(q);
@@ -200,7 +200,10 @@ public class SyncHttpUtil {
             JSONArray resp = new JSONArray(body);
             String lastUpdate = lu;
             try {
-
+                if (isCleanFirst() && resp.length() > 0) {
+                    int delete = dataTypeDao.deleteBuilder().delete();
+                    Log.d(TAG, String.format("Cleaning... %d deleted successfully.", delete));
+                }
                 for (int i = 0; i < resp.length(); i++) {
                     JSONObject o = resp.getJSONObject(i);
                     try {
@@ -232,7 +235,7 @@ public class SyncHttpUtil {
         }
     }
 
-    private String httpPost(String path, String json) {
+    public String httpPost(String path, String json) {
         try {
             SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
 
@@ -266,6 +269,65 @@ public class SyncHttpUtil {
                 writer.flush();
                 writer.close();
                 os.close();
+                http.connect();
+                int responseCode = http.getResponseCode();
+                if (responseCode != HttpsURLConnection.HTTP_OK) {
+                    throw new IOException("HTTP error code: " + responseCode);
+                }
+                is = http.getInputStream();
+                if (is != null) {
+                    String cl = http.getHeaderField("Content-Length");
+                    int len = cl == null ? 10000000 : Integer.parseInt(cl);
+                    Log.d(TAG, "Content-Length: " + len);
+                    //len=len*2;
+                    //result = readStream(is, len);
+                    result = readInputStreamToString(is);
+                }
+            } finally {
+                // Close Stream and disconnect HTTPS connection.
+                if (is != null) {
+                    is.close();
+                }
+                if (http != null) {
+                    http.disconnect();
+                }
+            }
+
+            //Response response = client.post(json, "application/json");
+            String body = result;
+            Log.d(TAG, "Response: " + body);
+
+            return body;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String httpGet(String path) {
+        try {
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+
+            String username = sharedPrefs.getString("user_username", "anonymous");
+            String password = sharedPrefs.getString("user_password", "anonymous");
+            //fi.setForm(null);
+
+            Gson g = new Gson();
+            InputStream is = null;
+            String result = null;
+            HttpURLConnection http = null;
+            try {
+                String basicAuth2 = "Basic "
+                        + Base64.encodeToString(String.format("%s:%s", username, password).getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+
+                URL url = new URL(HttpUtil.FORMS_BASE_URL + path);
+                http = (HttpURLConnection) url.openConnection();
+                http.setReadTimeout(3000);
+                http.setConnectTimeout(3000);
+                http.setRequestMethod("GET");
+                http.setRequestProperty("Authorization", basicAuth2);
+                http.setDoInput(true);
+                http.setDoOutput(false);
                 http.connect();
                 int responseCode = http.getResponseCode();
                 if (responseCode != HttpsURLConnection.HTTP_OK) {
@@ -344,5 +406,13 @@ public class SyncHttpUtil {
             }
         }
         return result;
+    }
+
+    public boolean isCleanFirst() {
+        return cleanFirst;
+    }
+
+    public void setCleanFirst(boolean cleanFirst) {
+        this.cleanFirst = cleanFirst;
     }
 }

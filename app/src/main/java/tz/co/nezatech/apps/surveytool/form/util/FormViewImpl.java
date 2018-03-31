@@ -190,7 +190,7 @@ public class FormViewImpl implements FormView {
                     break;
                 case INPDTP:
                     if (v instanceof LinearLayout) {
-                        RadioGroupInput grp = null;
+                        SelectInput grp = null;
 
                         LinearLayout radioLayout = (LinearLayout) v;
                         RadioGroup rg = (RadioGroup) radioLayout.findViewById(R.id.formRadioGroup);
@@ -202,9 +202,9 @@ public class FormViewImpl implements FormView {
 
                             if (rb.getText().equals(context.getString(R.string.formRadioGroupOtherSpecifyNewLabel))) {
                                 String dtType = rb.getTag().toString().split(":")[1];
-                                grp = new RadioGroupInput(dtType + context.getString(R.string.constTextOthersSpecify), otherSp.getText().toString());
+                                grp = new SelectInput(dtType + context.getString(R.string.constTextOthersSpecify), otherSp.getText().toString());
                             } else {
-                                grp = new RadioGroupInput(rb.getText().toString());
+                                grp = new SelectInput(rb.getText().toString());
                             }
 
                             value = grp;
@@ -221,7 +221,7 @@ public class FormViewImpl implements FormView {
                     if (v instanceof LinearLayout) {
                         LinearLayout checkLayout = (LinearLayout) v;
                         LinearLayout formCheckGroup = (LinearLayout) checkLayout.findViewById(R.id.formCheckGroup);
-                        List<CheckBoxInput> selected = new LinkedList<>();
+                        List<ExtraSelectInput> selected = new LinkedList<>();
                         for (int i = 0; i < formCheckGroup.getChildCount(); ++i) {
                             final LinearLayout checkBoxRow = (LinearLayout) formCheckGroup.getChildAt(i);
                             final CheckBox cb = (CheckBox) checkBoxRow.findViewById(R.id.checkBox1);
@@ -237,9 +237,9 @@ public class FormViewImpl implements FormView {
 
                                 if (cb.getText().equals(context.getString(R.string.formCheckBoxOtherSpecifyNewLabel))) {
                                     String dtType = cb.getTag().toString().split(":")[1];
-                                    selected.add(new CheckBoxInput(dtType + context.getString(R.string.constTextOthersSpecify), extras, otherSp.getText().toString()));
+                                    selected.add(new ExtraSelectInput(dtType + context.getString(R.string.constTextOthersSpecify), extras, otherSp.getText().toString()));
                                 } else {
-                                    selected.add(new CheckBoxInput(cb.getText().toString(), extras));
+                                    selected.add(new ExtraSelectInput(cb.getText().toString(), extras));
                                 }
                             }
                         }

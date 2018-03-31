@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Locale;
 
 import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
@@ -97,7 +98,7 @@ public class FormViewActivity extends AppCompatActivity {
             LinearLayout viewVontrols = (LinearLayout) findViewById(R.id.viewVontrols);
             final LinearLayout mainLayout = (LinearLayout) findViewById(R.id.form_edit_layout);
 
-            ImageButton btnDelete = (ImageButton) viewVontrols.findViewById(R.id.btnDelete);
+            Button btnDelete = (Button) viewVontrols.findViewById(R.id.btnDelete);
             btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -110,7 +111,7 @@ public class FormViewActivity extends AppCompatActivity {
                     }
                 }
             });
-            ImageButton btnEdit = (ImageButton) viewVontrols.findViewById(R.id.btnEdit);
+            Button btnEdit = (Button) viewVontrols.findViewById(R.id.btnEdit);
             btnEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -129,10 +130,11 @@ public class FormViewActivity extends AppCompatActivity {
 
             for (int g = 0; g < groups.length(); g++) {
                 final JSONObject group = (JSONObject) groups.get(g);
+                Log.d(TAG, String.format(Locale.ENGLISH, "Group: %d, %s", g, group.toString(2)));
 
                 String type = surveyForm.jsonStr(group, "type", "Text");
                 String grpName = surveyForm.jsonStr(group, "name", null);
-                Log.d(TAG, "Type: " + type);
+
 
                 final TextView grpLabel = (TextView) (layoutInflater.inflate(R.layout.form_group_label, null));
                 TypeRef<List<String>> typeRef = new TypeRef<List<String>>() {

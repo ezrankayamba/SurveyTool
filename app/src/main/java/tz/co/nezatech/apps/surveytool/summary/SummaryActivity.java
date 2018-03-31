@@ -7,99 +7,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Filter;
 import android.widget.ListView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RawRowMapper;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
-import tz.co.nezatech.apps.surveytool.db.model.Form;
-import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
-import tz.co.nezatech.apps.surveytool.util.Group;
-import tz.co.nezatech.apps.surveytool.util.Input;
-import tz.co.nezatech.apps.surveytool.util.Instance;
 import tz.co.nezatech.apps.surveytool.util.ListAdapter;
 
 public class SummaryActivity extends AppCompatActivity {
     final static String TAG = SummaryActivity.class.getName();
     private DatabaseHelper databaseHelper = null;
-
-    public static void dummyRecords(DatabaseHelper db, int limit) {
-        try {
-            //clear all dummy
-            //db.getFormInstanceDao().executeRaw("delete from tbl_form_instance where name like '%Dumm%'");
-
-            List<Form> forms = db.getFormDao().queryForAll();
-            Log.d(TAG, "Dummy forms: " + "dummyRecords");
-            if (!forms.isEmpty()) {
-                Random r = new Random();
-                Form form = forms.get(0);
-                Log.d(TAG, "The form: " + form.getName());
-                for (int i = 0; i < limit; i++) {
-                    try {
-                        Instance instance = new Instance(form.getFormId());
-                        Group group = new Group("DCategory1", "DummyGrp1", "DGrpType1", "DummyLabel");
-                        List<Input> inputs = new ArrayList<>();
-                        for (int j = 0; j < 2; j++) {
-                            Input inp = new Input("ICategory" + i + "" + j, "ICategory" + i + "" + j + ".DInput" + i + "" + j, "DInputType" + i + "" + j, "DValue" + i + "" + j, "DummyLabel");
-                            inputs.add(inp);
-                        }
-                        group.setInputs(inputs);
-
-                        List<Group> groups = new ArrayList<>();
-                        groups.add(group);
-
-                        instance.setGroups(groups);
-                        Gson gson = new Gson();
-                        String json = gson.toJson(instance);
-                        Log.d(TAG, "JSON: " + json);
-                        String tmpl = "My Dummies[" + r.nextInt((limit * 100 - 100) + 100) + "]";
-                        Log.d(TAG, "Display: " + tmpl);
-
-                        FormInstance newInstance = new FormInstance(form, json, tmpl);
-                        Calendar c = Calendar.getInstance();
-
-                        int i1 = r.nextInt(40 - 0) + 0;
-                        c.add(Calendar.DATE, -i1);
-                        newInstance.setRecordDate(c.getTime());
-                        db.getFormInstanceDao().create(newInstance);
-                        Log.d(TAG, "Successfully recorded dummy: " + newInstance.getName());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Exception: " + e.getMessage());
-                    }
-                }
-            } else {
-                Log.d(TAG, "Dummy forms: No form to use");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static void dummyRecordsRemove(DatabaseHelper db) {
-        try {
-            //clear all dummy
-            db.getFormInstanceDao().executeRaw("delete from tbl_form_instance where name like '%Dumm%'");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
+    private ListView mListView;
+    private Filter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,10 +50,41 @@ public class SummaryActivity extends AppCompatActivity {
         displaySummary();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.form_summary, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search_summary);
+        android.support.v7.widget.SearchView mSearchView = (android.support.v7.widget.SearchView) searchItem.getActionView();
+        mSearchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Log.d(TAG, "Query submitted: " + query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Log.d(TAG, "Query text changed: " + newText);
+                if (TextUtils.isEmpty(newText)) {
+                    mListView.clearTextFilter();
+                    filter.filter("");
+                } else {
+                    mListView.setFilterText(newText);
+                    filter.filter(newText);
+                }
+                return true;
+            }
+        });
+        mSearchView.setQueryHint(getString(R.string.summary_filter_hint));
+        //mSearchView.setQueryHint(getString(R.string.list_filter_hint));
+        return true;
+    }
+
     private void displaySummary() {
         try {
             List<SummaryLine> summaryLines = summaryLines();
-            final ListView mListView = (ListView) findViewById(R.id.summary_list);
+
+            mListView = (ListView) findViewById(R.id.summary_list);
             ListAdapter<SummaryLine> adapter = new ListAdapter<SummaryLine>(SummaryActivity.this, summaryLines) {
                 @Override
                 protected void handleRowClick(int position, SummaryLine e) {
@@ -152,34 +112,8 @@ public class SummaryActivity extends AppCompatActivity {
             mListView.setAdapter(adapter);
             mListView.setTextFilterEnabled(false);
 
-            final Filter filter = adapter.getFilter();
 
-
-            SearchView mSearchView = (SearchView) findViewById(R.id.searchText);
-            mSearchView.setIconifiedByDefault(false);
-            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    Log.d(TAG, "Query submitted: " + query);
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    Log.d(TAG, "Query text changed: " + newText);
-                    if (TextUtils.isEmpty(newText)) {
-                        mListView.clearTextFilter();
-                        filter.filter("");
-                    } else {
-                        mListView.setFilterText(newText);
-                        filter.filter(newText);
-                    }
-                    return true;
-                }
-            });
-            //mSearchView.setSubmitButtonEnabled(true);
-            mSearchView.setQueryHint(getString(R.string.summary_filter_hint));
-            mSearchView.clearFocus();
+            filter = adapter.getFilter();
         } catch (Exception e) {
             e.printStackTrace();
         }

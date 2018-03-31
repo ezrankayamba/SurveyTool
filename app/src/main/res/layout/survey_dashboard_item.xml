@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dashboard_item_box_shadow"
@@ -44,28 +43,22 @@
         android:layout_height="wrap_content"
         android:background="@color/secondaryLightColor"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="4dp">
 
-        <TextView
-            android:id="@+id/dashboardNumOfForms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center_horizontal"
-            android:padding="4dp"
-            android:text="20"
-            android:textColor="@color/primaryTextColor"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <ImageButton
+        <Button
             android:id="@+id/btnRunSurvey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@android:color/transparent"
+            android:drawableRight="@drawable/ic_dashboard_run_white"
             android:padding="4dp"
-            android:theme="@style/FormsButton"
-            app:srcCompat="@drawable/ic_dashboard_run_white" />
+            android:text="20"
+            android:textAlignment="viewStart"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:theme="@style/FormsButton" />
     </LinearLayout>
 </LinearLayout>

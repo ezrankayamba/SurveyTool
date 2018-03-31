@@ -35,7 +35,7 @@ import tz.co.nezatech.apps.surveytool.util.FormUtil;
 
 
 public class FormEditActivity extends AppCompatActivity {
-    final String TAG = FormEditActivity.class.getName();
+    private final String TAG = FormEditActivity.class.getName();
     Form form;
     SurveyFormLocCapture surveyForm;
     FormInstance formInstance = null;

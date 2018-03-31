@@ -1,5 +1,6 @@
 package tz.co.nezatech.apps.surveytool.form;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,11 +21,16 @@ import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
+import tz.co.nezatech.apps.surveytool.MainActivity;
 import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
 import tz.co.nezatech.apps.surveytool.db.model.Form;
 import tz.co.nezatech.apps.surveytool.db.model.FormInstance;
+import tz.co.nezatech.apps.surveytool.sync.AsyncAnyTask;
+import tz.co.nezatech.apps.surveytool.sync.AsyncTaskListener;
+import tz.co.nezatech.apps.surveytool.sync.SyncHttpUtil;
 import tz.co.nezatech.apps.surveytool.util.FormUtil;
 import tz.co.nezatech.apps.surveytool.util.ListAdapter;
 
@@ -98,7 +104,7 @@ public class FormInstanceActivity extends AppCompatActivity {
                         syncStatusIcon.setImageResource(R.mipmap.forms_sync_done);
                     }
                     TextView lastUpdate = (TextView) v.findViewById(R.id.lastUpdate);
-                    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
                     lastUpdate.setText(String.format("Last updated: %s", df.format(p.getRecordDate())));
                 }
 
@@ -159,7 +165,69 @@ public class FormInstanceActivity extends AppCompatActivity {
             }
         });
         mSearchView.setQueryHint(getString(R.string.list_filter_hint));
+
+
+        /*MenuItem syncItem = menu.findItem(R.id.action_local_form_sync);
+        Button syncButton = (Button) syncItem.getActionView();
+        syncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                syncManually(v);
+            }
+        });*/
+
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_local_form_sync:
+                syncManually(mListView);
+                break;
+            case android.R.id.home:
+                onUpButtonPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return true;
+    }
+
+    private void onUpButtonPressed() {
+        Intent intent = new Intent(FormInstanceActivity.this, MainActivity.class);
+        intent.putExtra(FormUtil.FORM_REPOS_DATA, form);
+        startActivity(intent);
+        finish();
+    }
+
+    private void syncManually(View v) {
+        Log.d(TAG, String.format(Locale.ENGLISH, "syncManually: %s", v));
+        @SuppressLint("StaticFieldLeak") AsyncAnyTask anyTask = new AsyncAnyTask(v, FormInstanceActivity.this, new AsyncTaskListener() {
+            @Override
+            public void done(View view, boolean success) {
+
+            }
+
+            @Override
+            public boolean processResponse(String body) {
+                return true;
+            }
+        }) {
+            @Override
+            public boolean processInBackground(String... strings) {
+                try {
+                    Log.d(TAG, "processInBackground");
+                    new SyncHttpUtil(FormInstanceActivity.this).syncLocalToServer(getHelper().getFormInstanceDao());
+                    return true;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+        };
+        anyTask.execute();
     }
 
 }

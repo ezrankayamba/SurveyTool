@@ -11,6 +11,8 @@ public class DataType {
     String type;
     @DatabaseField
     String lastUpdate;
+    @DatabaseField
+    int position = 0;
 
 
     public DataType() {
@@ -18,10 +20,15 @@ public class DataType {
     }
 
     public DataType(String name, String type, String lastUpdate) {
+        this(name, type, lastUpdate, 0);
+    }
+
+    public DataType(String name, String type, String lastUpdate, int position) {
         super();
         this.name = name;
         this.type = type;
         this.lastUpdate = lastUpdate;
+        this.position = position;
     }
 
     public String getName() {
@@ -46,6 +53,14 @@ public class DataType {
 
     public void setLastUpdate(String lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     @Override

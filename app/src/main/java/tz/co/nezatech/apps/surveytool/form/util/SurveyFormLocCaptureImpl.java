@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import tz.co.nezatech.apps.surveytool.R;
 import tz.co.nezatech.apps.surveytool.db.DatabaseHelper;
@@ -36,10 +37,9 @@ import tz.co.nezatech.apps.surveytool.location.LocationService;
 
 public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFormLocCapture {
     private static final String TAG = SurveyFormLocCaptureImpl.class.getName();
-    public LocationService locationService;
-    Location currentLocation = null;
-    private String provider;
-    private LinkedHashMap<String, LinkedHashMap<String, EditText>> locationMap = new LinkedHashMap<>();
+    private LocationService locationService;
+    private Location currentLocation;
+    private LinkedHashMap<String, LinkedHashMap<String, EditText>> locationMap;
     private List<LocationChangeListener> locationChangeListenerList = new LinkedList<>();
     private ServiceConnection serviceConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -61,27 +61,17 @@ public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFo
         }
     };
 
-    public SurveyFormLocCaptureImpl(Context context, DatabaseHelper databaseHelper, Form form) {
-        super(context, databaseHelper, form);
-    }
-
-    public SurveyFormLocCaptureImpl(Context context, DatabaseHelper databaseHelper, Form form, FormInstance formInstance) {
-        super(context, databaseHelper, form, formInstance);
-    }
-
     public SurveyFormLocCaptureImpl(Context context, DatabaseHelper databaseHelper, Form form, FormInstance formInstance, FormMode formMode) {
         super(context, databaseHelper, form, formInstance, formMode);
+        currentLocation = null;
+        locationMap = new LinkedHashMap<>();
     }
 
-    public LinkedHashMap<String, LinkedHashMap<String, EditText>> getLocationMap() {
+    private LinkedHashMap<String, LinkedHashMap<String, EditText>> getLocationMap() {
         return locationMap;
     }
 
-    public void setLocationMap(LinkedHashMap<String, LinkedHashMap<String, EditText>> locationMap) {
-        this.locationMap = locationMap;
-    }
-
-    public void addLocationChangeListener(LocationChangeListener listener) {
+    private void addLocationChangeListener(LocationChangeListener listener) {
         locationChangeListenerList.add(listener);
     }
 
@@ -115,7 +105,7 @@ public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFo
 
     @Override
     public void doGPSLocationCapture(LayoutInflater inflater, LinearLayout gropusLayout, final JSONObject group) throws JSONException {
-        final LinearLayout form = (LinearLayout) inflater.inflate(R.layout.form_layout_gps, null);
+        final LinearLayout form = (LinearLayout) inflater.inflate(R.layout.form_layout_gps, gropusLayout, false);
         setFormGrpTag(group, form);
 
         final JSONArray inputs = (JSONArray) group.get("inputs");
@@ -126,7 +116,7 @@ public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFo
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refreshLocGPS(v);
+                refreshLocGPS();
             }
         });
 
@@ -138,17 +128,17 @@ public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFo
 
             Log.d(TAG, "Input: " + input.getString("name"));
 
-            TextView label = (TextView) inflater.inflate(R.layout.form_label, null);
+            TextView label = (TextView) inflater.inflate(R.layout.form_label, form, false);
             label.setText(input.getString("label"));
             form.addView(label);
 
-            EditText text = (EditText) inflater.inflate(R.layout.form_input_text, null);
+            EditText text = (EditText) inflater.inflate(R.layout.form_input_text, form, false);
             String name = jsonStr(input, "name", null);
-            if (formInstance != null) {
+            if (getFormInstance() != null) {
                 TypeRef<List<String>> typeRef = new TypeRef<List<String>>() {
                 };
                 String path = "$.groups[?(@.name == '" + jsonStr(group, "name", null) + "')].inputs[?(@.name == '" + name + "')].value";
-                List<String> v = JsonPath.parse(formInstance.getJson()).read(path, typeRef);
+                List<String> v = JsonPath.parse(getFormInstance().getJson()).read(path, typeRef);
                 text.setText(v.isEmpty() ? "" : v.get(0));
             }
             form.addView(text);
@@ -156,7 +146,7 @@ public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFo
 
             latLong.put(name, text);
 
-            LinearLayout vspace1 = (LinearLayout) inflater.inflate(R.layout.form_input_vseparator, null);
+            LinearLayout vspace1 = (LinearLayout) inflater.inflate(R.layout.form_input_vseparator, form, false);
             form.addView(vspace1);
         }
 
@@ -166,20 +156,21 @@ public class SurveyFormLocCaptureImpl extends SurveyFormImpl implements SurveyFo
             public void locationChanged(Location location) {
                 float accuracy = location.getAccuracy();
                 TextView gpsAccuracy = (TextView) form.findViewById(R.id.gpsAccuracy);
-                gpsAccuracy.setText(String.format("Accuracy: %.2fm", accuracy));
+                gpsAccuracy.setText(String.format(Locale.ENGLISH, "Accuracy: %.2fm", accuracy));
 
                 Log.d(TAG, "GPS Listener: Accuracy: " + accuracy);
             }
         });
 
-        refreshLocGPS(btn);
+        refreshLocGPS();
     }
 
     private Location getLastKnownLocation() {
         return this.currentLocation;
     }
 
-    public void refreshLocGPS(View view) {
+    private void refreshLocGPS() {
+        final Context context = getContext();
         try {
             Log.d(TAG, "Refreshing GPS");
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
