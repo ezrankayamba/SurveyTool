@@ -93,7 +93,6 @@ public class SyncHttpUtil {
             JSONArray resp = new JSONArray(body);
             String lastUpdate = lu;
             try {
-
                 for (int i = 0; i < resp.length(); i++) {
                     JSONObject o = resp.getJSONObject(i);
                     try {
@@ -311,8 +310,8 @@ public class SyncHttpUtil {
             String username = sharedPrefs.getString("user_username", "anonymous");
             String password = sharedPrefs.getString("user_password", "anonymous");
             //fi.setForm(null);
+            Log.d(TAG, String.format("%s => %s", username, password));
 
-            Gson g = new Gson();
             InputStream is = null;
             String result = null;
             HttpURLConnection http = null;
@@ -321,6 +320,8 @@ public class SyncHttpUtil {
                         + Base64.encodeToString(String.format("%s:%s", username, password).getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
 
                 URL url = new URL(HttpUtil.FORMS_BASE_URL + path);
+                Log.d(TAG, "Host: " + url.getHost());
+                Log.d(TAG, "Path: "+path);
                 http = (HttpURLConnection) url.openConnection();
                 http.setReadTimeout(3000);
                 http.setConnectTimeout(3000);

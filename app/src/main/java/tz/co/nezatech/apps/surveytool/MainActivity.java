@@ -51,6 +51,7 @@ import tz.co.nezatech.apps.surveytool.location.LocationActivity;
 import tz.co.nezatech.apps.surveytool.summary.SummaryActivity;
 import tz.co.nezatech.apps.surveytool.sync.AsyncHttpTask;
 import tz.co.nezatech.apps.surveytool.sync.AsyncTaskListener;
+import tz.co.nezatech.apps.surveytool.sync.SimpleHttpSyncService;
 import tz.co.nezatech.apps.surveytool.util.FormUtil;
 import tz.co.nezatech.apps.surveytool.util.HttpUtil;
 
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity
     private static final int ENABLE_GPS_RESULT_CODE = 60;
     // Sync interval constants
 
-    final String TAG = MainActivity.class.getName();
+    final String TAG = MainActivity.class.getSimpleName();
     LayoutInflater layoutInflater = null;
     private DatabaseHelper databaseHelper = null;
 
@@ -96,6 +97,8 @@ public class MainActivity extends AppCompatActivity
         View headerView = navigationView.getHeaderView(0);
         TextView tv = (TextView) headerView.findViewById(R.id.header_user_username);
         tv.setText(settings.getString("user_username", "test"));
+
+        startService(new Intent(this, SimpleHttpSyncService.class));
     }
 
     private void syncFormRepos(FloatingActionButton fab) {

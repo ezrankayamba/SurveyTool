@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     //buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "tz.co.nezatech.apps.surveytool"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -23,15 +23,14 @@ android {
 
 dependencies {
     //compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
-    compile group: 'com.j256.ormlite', name: 'ormlite-android', version: '5.1'
-    compile 'com.android.support:support-core-utils:25.4.0'
-    compile 'com.android.support:appcompat-v7:25.+'
-    compile 'com.android.support:design:25.+'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:support-v4:25.+'
-    compile 'com.android.support:support-vector-drawable:25.+'
-    compile 'com.android.support:recyclerview-v7:25.+'
-    compile 'com.google.code.gson:gson:2.8.2'
-
+    implementation group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    implementation group: 'com.j256.ormlite', name: 'ormlite-android', version: '5.1'
+    implementation 'com.android.support:support-core-utils:26+'
+    implementation 'com.android.support:appcompat-v7:26.+'
+    implementation 'com.android.support:design:26.+'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support:support-v4:26.+'
+    implementation 'com.android.support:support-vector-drawable:26.+'
+    implementation 'com.android.support:recyclerview-v7:26.+'
+    implementation 'com.google.code.gson:gson:2.8.2'
 }

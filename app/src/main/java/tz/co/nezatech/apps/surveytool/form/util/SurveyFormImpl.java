@@ -270,8 +270,8 @@ class SurveyFormImpl extends FormViewImpl implements SurveyForm {
                 form.addView(label);
 
                 String setupsRegex = "^Setup\\.(\\w+)$";
-                String otherSelectRegex = "^Select\\[([ a-zA-Z0-9,;()/]+)]$";
-                String otherMultiSelectRegex = "^MultiSelect\\[([ a-zA-Z0-9,;()/]+)]$";
+                String otherSelectRegex = "^Select\\[([ a-zA-Z0-9,;()/&]+)]$";
+                String otherMultiSelectRegex = "^MultiSelect\\[([ a-zA-Z0-9,;()/&]+)]$";
 
                 Pattern pattern = Pattern.compile(setupsRegex);
                 Matcher matcher = pattern.matcher(dataType == null ? "" : dataType);
@@ -360,7 +360,6 @@ class SurveyFormImpl extends FormViewImpl implements SurveyForm {
 
             }
             Log.d(TAG, String.format("inputMultiSelect=> %s = %s", name, values));
-
 
             LinearLayout checkLayout = (LinearLayout) inflater.inflate(R.layout.form_input_layout_checkgroup, form, false);
             LinearLayout formCheckGroup = (LinearLayout) checkLayout.findViewById(R.id.formCheckGroup);

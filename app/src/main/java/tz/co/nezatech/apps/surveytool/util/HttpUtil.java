@@ -5,8 +5,8 @@ package tz.co.nezatech.apps.surveytool.util;
  */
 
 public class HttpUtil {
-    public static final String FORMS_BASE_URL = "http://pincomtz.net:8001";
-    //public static final String FORMS_BASE_URL = "http://2ed98073.ngrok.io";
+    public static final String FORMS_BASE_URL = "http://77.73.69.79:8001";
+    //public static final String FORMS_BASE_URL = "https://dcc55469.ngrok.io";
     public static final String FORMS_PATH = "/survey/api/forms";
     public static final String FORMS_SYNC_PATH = "/survey/api/forms";
     public static final String FORMS_DOWNLOAD_SYNC_PATH = "/survey/api/forms/download";
